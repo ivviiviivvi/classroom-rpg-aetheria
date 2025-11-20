@@ -62,7 +62,7 @@ export function RealmMap({ realms, theme, onRealmClick }: RealmMapProps) {
                          theme === 'scifi' ? 'icosahedron' :
                          theme === 'medieval' ? 'dodecahedron' : 'sphere'
 
-    realms.forEach((realm) => {
+    realms.forEach((realm, index) => {
       const geometry = createGeometry(geometryType)
       const material = new THREE.MeshPhongMaterial({
         color: new THREE.Color(realm.color),
@@ -73,7 +73,14 @@ export function RealmMap({ realms, theme, onRealmClick }: RealmMapProps) {
         shininess: 100
       })
       const mesh = new THREE.Mesh(geometry, material)
-      mesh.position.set(realm.position.x, realm.position.y, realm.position.z)
+      
+      const position = realm.position || {
+        x: Math.cos((index / realms.length) * Math.PI * 2) * 3,
+        y: Math.sin((index / realms.length) * Math.PI * 2) * 3,
+        z: 0
+      }
+      
+      mesh.position.set(position.x, position.y, position.z)
       mesh.userData = { realmId: realm.id }
       scene.add(mesh)
       meshesRef.current.set(realm.id, mesh)

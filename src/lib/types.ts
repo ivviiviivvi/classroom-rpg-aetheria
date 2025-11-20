@@ -65,7 +65,7 @@ export interface Realm {
   name: string
   description: string
   color: string
-  position: { x: number; y: number; z: number }
+  position?: { x: number; y: number; z: number }
   createdAt: number
 }
 
