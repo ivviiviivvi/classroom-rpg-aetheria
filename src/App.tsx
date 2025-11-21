@@ -148,13 +148,17 @@ function App() {
     if (!quest) return
 
     try {
-      const promptParts = [
-        'You are the ', themeConfig.oracleLabel, ' in a gamified learning system. Evaluate this student submission.\n\nQuest: ',
-        quest.name, '\nDescription: ', quest.description, '\nStudent Response: ', content,
-        '\n\nProvide:\n1. A score from 0-100\n2. Constructive feedback in 2-3 sentences, speaking in character as the ',
-        themeConfig.oracleLabel, '\n\nFormat your response as JSON: {"score": number, "feedback": "string"}'
-      ]
-      const submissionPrompt = promptParts.join('')
+      const submissionPrompt = `You are the ${themeConfig.oracleLabel} in a gamified learning system. Evaluate this student submission.
+
+Quest: ${quest.name}
+Description: ${quest.description}
+Student Response: ${content}
+
+Provide:
+1. A score from 0-100
+2. Constructive feedback in 2-3 sentences, speaking in character as the ${themeConfig.oracleLabel}
+
+Format your response as JSON: {"score": number, "feedback": "string"}`
 
       const result = await window.spark.llm(submissionPrompt, 'gpt-4o', true)
       const evaluation = JSON.parse(result)
@@ -223,14 +227,19 @@ function App() {
           (current || []).map(q => q.id === questId ? { ...q, status: 'failed' as const } : q)
         )
 
-        const crystalPromptParts = [
-          'Create a Knowledge Crystal (study guide) for a student who struggled with this quest.\n\nQuest: ',
-          quest.name, '\nDescription: ', quest.description, "\nStudent's Response: ", content,
-          '\nScore: ', evaluation.score.toString(),
-          '\n\nWrite a 3-4 paragraph study guide that:\n1. Explains the key concept they missed\n2. Provides examples\n3. Encourages them to try again\n\nKeep the tone matching the ',
-          themeConfig.oracleLabel, ' character.'
-        ]
-        const crystalPrompt = crystalPromptParts.join('')
+        const crystalPrompt = `Create a Knowledge Crystal (study guide) for a student who struggled with this quest.
+
+Quest: ${quest.name}
+Description: ${quest.description}
+Student's Response: ${content}
+Score: ${evaluation.score}
+
+Write a 3-4 paragraph study guide that:
+1. Explains the key concept they missed
+2. Provides examples
+3. Encourages them to try again
+
+Keep the tone matching the ${themeConfig.oracleLabel} character.`
 
         const crystalContent = await window.spark.llm(crystalPrompt, 'gpt-4o')
 
@@ -246,12 +255,13 @@ function App() {
 
         setCrystals((current) => [...(current || []), crystal])
 
-        const redemptionPromptParts = [
-          'Create a simplified redemption quest based on the original quest.\n\nOriginal Quest: ',
-          quest.name, '\nDescription: ', quest.description,
-          '\n\nCreate a simpler version that focuses on the core concept. Make it achievable for a struggling student.\nJust provide the quest name and description as JSON: {"name": "string", "description": "string"}'
-        ]
-        const redemptionPrompt = redemptionPromptParts.join('')
+        const redemptionPrompt = `Create a simplified redemption quest based on the original quest.
+
+Original Quest: ${quest.name}
+Description: ${quest.description}
+
+Create a simpler version that focuses on the core concept. Make it achievable for a struggling student.
+Just provide the quest name and description as JSON: {"name": "string", "description": "string"}`
 
         const redemptionData = JSON.parse(await window.spark.llm(redemptionPrompt, 'gpt-4o', true))
 
