@@ -3,9 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
 import { Quest, Theme, THEME_CONFIGS } from '@/lib/types'
 import { PaperPlaneRight, Sparkle } from '@phosphor-icons/react'
+import { LoadingOracle } from '@/components/LoadingOracle'
 import { toast } from 'sonner'
 
 interface QuestDialogProps {
@@ -91,15 +91,7 @@ export function QuestDialog({ quest, theme, open, onClose, onSubmit }: QuestDial
           </div>
 
           {isSubmitting && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Sparkle size={16} className="animate-spin text-accent" />
-                <span className="text-sm text-muted-foreground">
-                  The {themeConfig.oracleLabel} is evaluating your work...
-                </span>
-              </div>
-              <Progress value={undefined} className="h-1" />
-            </div>
+            <LoadingOracle theme={theme} />
           )}
 
           <div className="flex gap-3">

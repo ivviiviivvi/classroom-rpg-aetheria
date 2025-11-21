@@ -3,10 +3,11 @@ import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { House, User, BookOpen, Target, Sword, Brain, Shield, GraduationCap, ArrowsClockwise, Palette, Trophy, ChalkboardTeacher } from '@phosphor-icons/react'
+import { House, User, BookOpen, Target, Sword, Brain, Shield, GraduationCap, ArrowsClockwise, Palette, Trophy, ChalkboardTeacher, Sparkle } from '@phosphor-icons/react'
 import { Theme, Role, THEME_CONFIGS } from '@/lib/types'
 import { UserProfile } from '@/lib/types'
 import { calculateLevel, getLevelTitle, getXpForNextLevel } from '@/lib/game-utils'
+import { motion } from 'framer-motion'
 
 interface HUDSidebarProps {
   profile: UserProfile
@@ -31,7 +32,10 @@ export function HUDSidebar({
   const level = calculateLevel(profile.xp)
   const levelTitle = getLevelTitle(level, role)
   const nextLevelXp = getXpForNextLevel(profile.xp)
-  const xpProgress = ((profile.xp % nextLevelXp) / nextLevelXp) * 100
+  const currentLevelXp = level > 1 ? getXpForNextLevel(profile.xp - 1) : 0
+  const xpInCurrentLevel = profile.xp - currentLevelXp
+  const xpNeededForLevel = nextLevelXp - currentLevelXp
+  const xpProgress = (xpInCurrentLevel / xpNeededForLevel) * 100
 
   const RoleIcon = theme === 'fantasy' ? Sword :
                    theme === 'scifi' ? Brain :
@@ -39,19 +43,30 @@ export function HUDSidebar({
                    GraduationCap
 
   return (
-    <div className="w-80 h-screen glass-panel rounded-none border-r-2 border-l-0 border-t-0 border-b-0 flex flex-col p-6 space-y-6">
-      <div className="space-y-4">
+    <div className="w-80 h-screen glass-panel rounded-none border-r-2 border-l-0 border-t-0 border-b-0 flex flex-col p-6 space-y-6 overflow-y-auto">
+      <motion.div 
+        className="space-y-4"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="flex items-center gap-4">
-          <Avatar className="w-16 h-16 border-2 border-primary">
-            <AvatarImage src={profile.avatarUrl} />
-            <AvatarFallback className="bg-primary/20 text-primary text-xl font-bold">
-              {profile.name.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <motion.div
+            whileHover={{ scale: 1.05, rotate: [0, -5, 5, 0] }}
+            transition={{ duration: 0.3 }}
+          >
+            <Avatar className="w-16 h-16 border-2 border-primary shadow-lg">
+              <AvatarImage src={profile.avatarUrl} />
+              <AvatarFallback className="bg-primary/20 text-primary text-xl font-bold">
+                {profile.name.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </motion.div>
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-lg truncate">{profile.name}</h3>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs gap-1">
+                <Sparkle size={12} weight="fill" className="text-accent" />
                 Lvl {level}
               </Badge>
               <span className="text-xs text-muted-foreground">{levelTitle}</span>
@@ -62,96 +77,145 @@ export function HUDSidebar({
         <div className="space-y-2">
           <div className="flex justify-between text-xs">
             <span className="text-muted-foreground">{themeConfig.xpLabel}</span>
-            <span className="font-medium">{profile.xp} / {nextLevelXp}</span>
+            <span className="font-medium">{xpInCurrentLevel} / {xpNeededForLevel}</span>
           </div>
-          <Progress value={xpProgress} className="h-2" />
+          <div className="relative">
+            <Progress value={xpProgress} className="h-3" />
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-full"
+              animate={{
+                x: ['-100%', '200%']
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: 'linear'
+              }}
+            />
+          </div>
+          <div className="text-xs text-muted-foreground text-right">
+            {xpNeededForLevel - xpInCurrentLevel} {themeConfig.xpLabel} to level {level + 1}
+          </div>
         </div>
-      </div>
+
+        {profile.artifacts.length > 0 && (
+          <motion.div 
+            className="text-xs text-muted-foreground flex items-center gap-2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <Trophy size={14} className="text-accent" />
+            <span>{profile.artifacts.length} artifact{profile.artifacts.length !== 1 ? 's' : ''} collected</span>
+          </motion.div>
+        )}
+      </motion.div>
 
       <Separator className="bg-border" />
 
       <nav className="space-y-2 flex-1">
-        <Button
-          variant={currentView === 'world-map' ? 'default' : 'ghost'}
-          className="w-full justify-start gap-3"
-          onClick={() => onNavigate('world-map')}
-        >
-          <House size={20} />
-          World Map
-        </Button>
-        <Button
-          variant={currentView === 'quests' ? 'default' : 'ghost'}
-          className="w-full justify-start gap-3"
-          onClick={() => onNavigate('quests')}
-        >
-          <Target size={20} />
-          {themeConfig.questLabel}s
-        </Button>
-        <Button
-          variant={currentView === 'archives' ? 'default' : 'ghost'}
-          className="w-full justify-start gap-3"
-          onClick={() => onNavigate('archives')}
-        >
-          <BookOpen size={20} />
-          {themeConfig.archiveLabel}
-        </Button>
-        <Button
-          variant={currentView === 'character' ? 'default' : 'ghost'}
-          className="w-full justify-start gap-3"
-          onClick={() => onNavigate('character')}
-        >
-          <User size={20} />
-          My Hero
-        </Button>
-        <Button
-          variant={currentView === 'leaderboard' ? 'default' : 'ghost'}
-          className="w-full justify-start gap-3"
-          onClick={() => onNavigate('leaderboard')}
-        >
-          <Trophy size={20} />
-          Leaderboard
-        </Button>
-        {role === 'teacher' && (
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <Button
-            variant={currentView === 'teacher-dashboard' ? 'default' : 'ghost'}
+            variant={currentView === 'world-map' ? 'default' : 'ghost'}
             className="w-full justify-start gap-3"
-            onClick={() => onNavigate('teacher-dashboard')}
+            onClick={() => onNavigate('world-map')}
           >
-            <ChalkboardTeacher size={20} />
-            Manage
+            <House size={20} weight={currentView === 'world-map' ? 'fill' : 'regular'} />
+            World Map
           </Button>
+        </motion.div>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button
+            variant={currentView === 'quests' ? 'default' : 'ghost'}
+            className="w-full justify-start gap-3"
+            onClick={() => onNavigate('quests')}
+          >
+            <Target size={20} weight={currentView === 'quests' ? 'fill' : 'regular'} />
+            {themeConfig.questLabel}s
+          </Button>
+        </motion.div>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button
+            variant={currentView === 'archives' ? 'default' : 'ghost'}
+            className="w-full justify-start gap-3"
+            onClick={() => onNavigate('archives')}
+          >
+            <BookOpen size={20} weight={currentView === 'archives' ? 'fill' : 'regular'} />
+            {themeConfig.archiveLabel}
+          </Button>
+        </motion.div>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button
+            variant={currentView === 'character' ? 'default' : 'ghost'}
+            className="w-full justify-start gap-3"
+            onClick={() => onNavigate('character')}
+          >
+            <User size={20} weight={currentView === 'character' ? 'fill' : 'regular'} />
+            My Hero
+          </Button>
+        </motion.div>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button
+            variant={currentView === 'leaderboard' ? 'default' : 'ghost'}
+            className="w-full justify-start gap-3"
+            onClick={() => onNavigate('leaderboard')}
+          >
+            <Trophy size={20} weight={currentView === 'leaderboard' ? 'fill' : 'regular'} />
+            Leaderboard
+          </Button>
+        </motion.div>
+        {role === 'teacher' && (
+          <motion.div 
+            whileHover={{ scale: 1.02 }} 
+            whileTap={{ scale: 0.98 }}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+          >
+            <Button
+              variant={currentView === 'teacher-dashboard' ? 'default' : 'ghost'}
+              className="w-full justify-start gap-3"
+              onClick={() => onNavigate('teacher-dashboard')}
+            >
+              <ChalkboardTeacher size={20} weight={currentView === 'teacher-dashboard' ? 'fill' : 'regular'} />
+              Manage
+            </Button>
+          </motion.div>
         )}
       </nav>
 
       <Separator className="bg-border" />
 
       <div className="space-y-2">
-        <Button
-          variant="outline"
-          className="w-full justify-start gap-3"
-          onClick={onRoleToggle}
-        >
-          <RoleIcon size={20} />
-          <div className="flex flex-col items-start">
-            <span className="text-xs text-muted-foreground">Playing as</span>
-            <span className="font-medium">
-              {role === 'teacher' ? themeConfig.teacherTitle : themeConfig.studentTitle}
-            </span>
-          </div>
-          <ArrowsClockwise size={16} className="ml-auto" />
-        </Button>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button
+            variant="outline"
+            className="w-full justify-start gap-3"
+            onClick={onRoleToggle}
+          >
+            <RoleIcon size={20} />
+            <div className="flex flex-col items-start">
+              <span className="text-xs text-muted-foreground">Playing as</span>
+              <span className="font-medium">
+                {role === 'teacher' ? themeConfig.teacherTitle : themeConfig.studentTitle}
+              </span>
+            </div>
+            <ArrowsClockwise size={16} className="ml-auto" />
+          </Button>
+        </motion.div>
 
-        <Button
-          variant="outline"
-          className="w-full justify-start gap-3"
-          onClick={onThemeChange}
-        >
-          <Palette size={20} />
-          <div className="flex flex-col items-start">
-            <span className="text-xs text-muted-foreground">Reality</span>
-            <span className="font-medium">{themeConfig.name}</span>
-          </div>
-        </Button>
+        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+          <Button
+            variant="outline"
+            className="w-full justify-start gap-3"
+            onClick={onThemeChange}
+          >
+            <Palette size={20} weight="fill" />
+            <div className="flex flex-col items-start">
+              <span className="text-xs text-muted-foreground">Reality</span>
+              <span className="font-medium">{themeConfig.name}</span>
+            </div>
+          </Button>
+        </motion.div>
       </div>
     </div>
   )

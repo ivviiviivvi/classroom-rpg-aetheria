@@ -2,8 +2,9 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Theme, THEME_CONFIGS, UserProfile } from '@/lib/types'
-import { Trophy, Medal, Star } from '@phosphor-icons/react'
+import { Trophy, Medal, Star, Crown, Sparkle } from '@phosphor-icons/react'
 import { calculateLevel, getLevelTitle } from '@/lib/game-utils'
+import { motion } from 'framer-motion'
 
 interface LeaderboardProps {
   profiles: UserProfile[]
@@ -17,14 +18,14 @@ export function Leaderboard({ profiles, theme, currentUserId }: LeaderboardProps
   const sortedProfiles = [...profiles].sort((a, b) => b.xp - a.xp)
 
   const getRankIcon = (rank: number) => {
-    if (rank === 1) return <Trophy size={24} weight="fill" className="text-accent" />
+    if (rank === 1) return <Crown size={28} weight="fill" className="text-accent" />
     if (rank === 2) return <Medal size={24} weight="fill" className="text-muted-foreground" />
     if (rank === 3) return <Medal size={24} weight="fill" className="text-destructive" />
     return <Star size={20} className="text-muted-foreground" />
   }
 
   const getRankColor = (rank: number) => {
-    if (rank === 1) return 'border-accent bg-accent/10'
+    if (rank === 1) return 'border-accent bg-accent/10 shadow-lg shadow-accent/20'
     if (rank === 2) return 'border-muted-foreground/50 bg-muted-foreground/5'
     if (rank === 3) return 'border-destructive/50 bg-destructive/5'
     return 'border-border'
@@ -54,53 +55,94 @@ export function Leaderboard({ profiles, theme, currentUserId }: LeaderboardProps
             const isCurrentUser = profile.id === currentUserId
 
             return (
-              <Card
+              <motion.div
                 key={profile.id}
-                className={`glass-panel p-6 border-2 transition-all hover:scale-[1.02] ${getRankColor(rank)} ${
-                  isCurrentUser ? 'ring-2 ring-primary' : ''
-                }`}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05, type: 'spring', stiffness: 100 }}
               >
-                <div className="flex items-center gap-6">
-                  <div className="flex items-center justify-center w-12">
-                    {rank <= 3 ? (
-                      getRankIcon(rank)
-                    ) : (
-                      <span className="text-2xl font-bold text-muted-foreground">#{rank}</span>
-                    )}
-                  </div>
-
-                  <Avatar className="w-16 h-16 border-2 border-primary">
-                    <AvatarFallback className="bg-primary/20 text-primary text-xl font-bold">
-                      {profile.name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-bold text-lg truncate">{profile.name}</h3>
-                      {isCurrentUser && (
-                        <Badge variant="default" className="text-xs">
-                          You
-                        </Badge>
+                <Card
+                  className={`glass-panel p-6 border-2 transition-all hover:scale-[1.02] ${getRankColor(rank)} ${
+                    isCurrentUser ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''
+                  }`}
+                >
+                  <div className="flex items-center gap-6">
+                    <div className="flex items-center justify-center w-12">
+                      {rank <= 3 ? (
+                        <motion.div
+                          animate={rank === 1 ? {
+                            rotate: [0, -10, 10, -10, 0],
+                            scale: [1, 1.1, 1]
+                          } : {}}
+                          transition={{
+                            duration: 2,
+                            repeat: rank === 1 ? Infinity : 0,
+                            repeatDelay: 3
+                          }}
+                        >
+                          {getRankIcon(rank)}
+                        </motion.div>
+                      ) : (
+                        <span className="text-2xl font-bold text-muted-foreground">#{rank}</span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>Level {level}</span>
-                      <span>•</span>
-                      <span>{levelTitle}</span>
-                      <span>•</span>
-                      <span>{profile.artifacts.length} artifacts</span>
-                    </div>
-                  </div>
 
-                  <div className="text-right">
-                    <div className="text-3xl font-bold text-accent">{profile.xp}</div>
-                    <div className="text-xs text-muted-foreground uppercase tracking-wide">
-                      {themeConfig.xpLabel}
+                    <motion.div
+                      whileHover={{ scale: 1.05, rotate: [0, -5, 5, 0] }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Avatar className="w-16 h-16 border-2 border-primary">
+                        <AvatarFallback className="bg-primary/20 text-primary text-xl font-bold">
+                          {profile.name.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    </motion.div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-bold text-lg truncate">{profile.name}</h3>
+                        {isCurrentUser && (
+                          <Badge variant="default" className="text-xs gap-1">
+                            <Sparkle size={12} weight="fill" />
+                            You
+                          </Badge>
+                        )}
+                        {rank === 1 && (
+                          <motion.div
+                            animate={{ opacity: [0.5, 1, 0.5] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                          >
+                            <Badge className="bg-accent text-accent-foreground text-xs">
+                              Champion
+                            </Badge>
+                          </motion.div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>Level {level}</span>
+                        <span>•</span>
+                        <span>{levelTitle}</span>
+                        {profile.artifacts.length > 0 && (
+                          <>
+                            <span>•</span>
+                            <span className="flex items-center gap-1">
+                              <Sparkle size={12} weight="fill" className="text-accent" />
+                              {profile.artifacts.length}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <div className="text-3xl font-bold text-accent">{profile.xp}</div>
+                      <div className="text-xs text-muted-foreground uppercase tracking-wide">
+                        {themeConfig.xpLabel}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Card>
+                </Card>
+              </motion.div>
             )
           })}
         </div>

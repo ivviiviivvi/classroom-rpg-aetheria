@@ -13,6 +13,9 @@ import { CharacterSheet } from '@/components/CharacterSheet'
 import { ArchivesView } from '@/components/ArchivesView'
 import { Leaderboard } from '@/components/Leaderboard'
 import { TeacherDashboard } from '@/components/TeacherDashboard'
+import { ParticleField } from '@/components/ParticleField'
+import { LevelUpCelebration } from '@/components/LevelUpCelebration'
+import { QuickStats } from '@/components/QuickStats'
 import { Button } from '@/components/ui/button'
 import { Plus, Target, Pencil, Sparkle } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
@@ -27,7 +30,8 @@ import type {
   Submission, 
   KnowledgeCrystal, 
   Artifact,
-  Theme
+  Theme,
+  Role
 } from '@/lib/types'
 import { 
   generateId, 
@@ -57,6 +61,8 @@ function App() {
   const [isCreatingQuest, setIsCreatingQuest] = useState(false)
   const [showNameDialog, setShowNameDialog] = useState(false)
   const [nameInput, setNameInput] = useState('')
+  const [showLevelUp, setShowLevelUp] = useState(false)
+  const [levelUpData, setLevelUpData] = useState<{ level: number; role: Role }>({ level: 1, role: 'student' })
   
   const [realms, setRealms] = useKV<Realm[]>('aetheria-realms', [])
   const [quests, setQuests] = useKV<Quest[]>('aetheria-quests', [])
@@ -149,10 +155,16 @@ function App() {
 
       if (evaluation.score >= 70) {
         const xpGained = quest.xpValue
+        const oldLevel = calculateLevel(currentProfile.xp)
         const newXp = currentProfile.xp + xpGained
         const newLevel = calculateLevel(newXp)
         const updatedProfile: UserProfile = { ...currentProfile, xp: newXp, level: newLevel }
         setProfile(updatedProfile)
+
+        if (newLevel > oldLevel) {
+          setLevelUpData({ level: newLevel, role: currentProfile.role })
+          setShowLevelUp(true)
+        }
 
         setQuests((current) =>
           (current || []).map(q => q.id === questId ? { ...q, status: 'completed' as const } : q)
@@ -306,7 +318,9 @@ function App() {
   const selectedQuest = quests?.find(q => q.id === selectedQuestId) || null
 
   return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden">
+    <div className="flex h-screen bg-background text-foreground overflow-hidden relative">
+      <ParticleField count={40} speed={0.2} />
+      
       <Dialog open={showNameDialog} onOpenChange={() => {}}>
         <DialogContent className="glass-panel" onPointerDownOutside={(e) => e.preventDefault()}>
           <DialogHeader>
@@ -452,7 +466,19 @@ function App() {
 
         {currentView === 'quests' && (
           <div className="p-8 space-y-6">
-            <h1 className="text-4xl font-bold">All {themeConfig.questLabel}s</h1>
+            <div>
+              <h1 className="text-4xl font-bold mb-2">All {themeConfig.questLabel}s</h1>
+              <p className="text-muted-foreground">Your journey across all realms</p>
+            </div>
+
+            <QuickStats
+              totalQuests={quests?.length || 0}
+              completedQuests={quests?.filter(q => q.status === 'completed').length || 0}
+              failedQuests={quests?.filter(q => q.status === 'failed').length || 0}
+              totalArtifacts={currentProfile.artifacts.length}
+              theme={currentTheme}
+            />
+
             {(!quests || quests.length === 0) ? (
               <div className="glass-panel p-12 text-center">
                 <p className="text-muted-foreground">No quests available</p>
@@ -542,6 +568,14 @@ function App() {
       />
 
       <Toaster position="top-right" />
+      
+      <LevelUpCelebration
+        show={showLevelUp}
+        level={levelUpData.level}
+        role={levelUpData.role}
+        theme={currentTheme}
+        onComplete={() => setShowLevelUp(false)}
+      />
     </div>
   )
 }
