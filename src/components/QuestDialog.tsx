@@ -44,45 +44,45 @@ export function QuestDialog({ quest, theme, open, onClose, onSubmit }: QuestDial
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="glass-panel max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="glass-panel max-w-3xl max-h-[90vh] overflow-y-auto w-[95vw] md:w-full">
         <DialogHeader>
-          <div className="flex items-center gap-3">
-            <Sparkle size={32} weight="fill" className="text-accent" />
-            <div>
-              <DialogTitle className="text-2xl">{quest.name}</DialogTitle>
-              <DialogDescription className="text-base mt-1">
+          <div className="flex items-center gap-2 md:gap-3">
+            <Sparkle size={24} weight="fill" className="md:w-8 md:h-8 text-accent flex-shrink-0" />
+            <div className="min-w-0">
+              <DialogTitle className="text-lg md:text-2xl truncate">{quest.name}</DialogTitle>
+              <DialogDescription className="text-sm md:text-base mt-1">
                 {quest.type === 'boss' ? 'Boss Battle' : quest.type === 'redemption' ? 'Redemption Quest' : 'Standard Quest'}
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="space-y-6 mt-4">
+        <div className="space-y-4 md:space-y-6 mt-4">
           <div className="space-y-2">
-            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Quest Briefing</h4>
-            <div className="glass-panel p-4 bg-muted/20">
-              <p className="text-foreground/90 leading-relaxed">{quest.description}</p>
+            <h4 className="font-semibold text-xs md:text-sm uppercase tracking-wide text-muted-foreground">Quest Briefing</h4>
+            <div className="glass-panel p-3 md:p-4 bg-muted/20">
+              <p className="text-sm md:text-base text-foreground/90 leading-relaxed">{quest.description}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <Badge variant="secondary" className="text-sm px-4 py-1">
+          <div className="flex items-center gap-3 md:gap-4 flex-wrap">
+            <Badge variant="secondary" className="text-xs md:text-sm px-3 md:px-4 py-1">
               Reward: {quest.xpValue} {themeConfig.xpLabel}
             </Badge>
             {quest.dueDate && (
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs md:text-sm text-muted-foreground">
                 Due: {new Date(quest.dueDate).toLocaleDateString()}
               </span>
             )}
           </div>
 
           <div className="space-y-2">
-            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Your Response</h4>
+            <h4 className="font-semibold text-xs md:text-sm uppercase tracking-wide text-muted-foreground">Your Response</h4>
             <Textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Enter your submission here..."
-              className="min-h-[200px] resize-none glass-panel text-base"
+              className="min-h-[150px] md:min-h-[200px] resize-none glass-panel text-sm md:text-base"
               disabled={isSubmitting}
             />
             <p className="text-xs text-muted-foreground">
@@ -94,7 +94,16 @@ export function QuestDialog({ quest, theme, open, onClose, onSubmit }: QuestDial
             <LoadingOracle theme={theme} />
           )}
 
-          <div className="flex gap-3">
+          <div className="flex flex-col-reverse md:flex-row gap-2 md:gap-3">
+            <Button
+              onClick={onClose}
+              variant="outline"
+              disabled={isSubmitting}
+              size="lg"
+              className="w-full md:w-auto"
+            >
+              Cancel
+            </Button>
             <Button
               onClick={handleSubmit}
               disabled={isSubmitting || !content.trim()}
@@ -102,15 +111,8 @@ export function QuestDialog({ quest, theme, open, onClose, onSubmit }: QuestDial
               size="lg"
             >
               <PaperPlaneRight size={20} weight="fill" />
-              Submit to {themeConfig.oracleLabel}
-            </Button>
-            <Button
-              onClick={onClose}
-              variant="outline"
-              disabled={isSubmitting}
-              size="lg"
-            >
-              Cancel
+              <span className="hidden md:inline">Submit to {themeConfig.oracleLabel}</span>
+              <span className="md:hidden">Submit</span>
             </Button>
           </div>
         </div>

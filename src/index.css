@@ -158,14 +158,36 @@
 
 body {
   font-family: var(--font-body);
+  touch-action: pan-y;
+  -webkit-tap-highlight-color: transparent;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-header);
 }
 
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+  }
+}
+
 .glass-panel {
   @apply bg-card backdrop-blur-xl border-2 border-border rounded-xl shadow-2xl;
+}
+
+@media (max-width: 768px) {
+  .glass-panel {
+    @apply backdrop-blur-lg;
+  }
 }
 
 .glass-button {

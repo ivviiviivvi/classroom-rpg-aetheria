@@ -46,7 +46,7 @@ export function HUDSidebar({
                    GraduationCap
 
   return (
-    <div className="w-80 h-screen glass-panel rounded-none border-r-2 border-l-0 border-t-0 border-b-0 flex flex-col p-6 space-y-6 overflow-y-auto">
+    <div className="hidden md:flex w-80 h-screen glass-panel rounded-none border-r-2 border-l-0 border-t-0 border-b-0 flex-col p-6 space-y-6 overflow-y-auto">
       <motion.div 
         className="space-y-4"
         initial={{ opacity: 0, y: -20 }}

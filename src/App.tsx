@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ErrorFallback } from '@/components/ErrorFallback'
 import { useTheme, useRole } from '@/hooks/use-theme'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { useTouchSwipe } from '@/hooks/use-touch-gestures'
 import { HUDSidebar } from '@/components/HUDSidebar'
+import { MobileNav } from '@/components/MobileNav'
 import { UniverseMap } from '@/components/UniverseMap'
 import { BoardGameMap } from '@/components/BoardGameMap'
 import { RealmEditor } from '@/components/RealmEditor'
@@ -74,6 +77,8 @@ function App() {
   const [nameInput, setNameInput] = useState('')
   const [showLevelUp, setShowLevelUp] = useState(false)
   const [levelUpData, setLevelUpData] = useState<{ level: number; role: Role }>({ level: 1, role: 'student' })
+  const mainRef = useRef<HTMLDivElement>(null)
+  const isMobile = useIsMobile()
   
   const [realms, setRealms] = useKV<Realm[]>('aetheria-realms', [])
   const [quests, setQuests] = useKV<Quest[]>('aetheria-quests', [])
@@ -367,9 +372,30 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
     )
   }
 
+  const viewOrder = ['world-map', 'quests', 'archives', 'character', 'leaderboard']
+  
+  useTouchSwipe(mainRef.current, {
+    onSwipeLeft: () => {
+      if (!isMobile) return
+      const currentIndex = viewOrder.indexOf(currentView)
+      if (currentIndex < viewOrder.length - 1) {
+        setCurrentView(viewOrder[currentIndex + 1])
+      }
+    },
+    onSwipeRight: () => {
+      if (!isMobile) return
+      const currentIndex = viewOrder.indexOf(currentView)
+      if (currentIndex > 0) {
+        setCurrentView(viewOrder[currentIndex - 1])
+      } else if (currentView === 'realm-detail') {
+        setCurrentView('world-map')
+      }
+    }
+  })
+
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden relative">
-      <ParticleField count={40} speed={0.2} />
+      <ParticleField count={isMobile ? 20 : 40} speed={0.2} />
       
       {(currentView === 'realm-detail' || currentView === 'constellation') && selectedRealm && (
         <ErrorBoundary 
@@ -423,6 +449,16 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
         </DialogContent>
       </Dialog>
 
+      <MobileNav
+        profile={currentProfile}
+        theme={currentTheme}
+        role={currentRole}
+        currentView={currentView}
+        onNavigate={setCurrentView}
+        onThemeChange={handleThemeChange}
+        onRoleToggle={handleRoleToggle}
+      />
+
       <HUDSidebar
         profile={currentProfile}
         theme={currentTheme}
@@ -433,11 +469,11 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
         onRoleToggle={handleRoleToggle}
       />
       
-      <div className="fixed bottom-4 left-4 z-50">
+      <div className="fixed bottom-4 left-4 z-40 md:z-50">
         <GenerativeMusic />
       </div>
 
-      <main className="flex-1 overflow-auto">
+      <main ref={mainRef} className="flex-1 overflow-auto pt-[60px] pb-[60px] md:pt-0 md:pb-0">
         <AnimatePresence mode="wait">
           {currentView === 'world-map' && (
             <motion.div
@@ -542,11 +578,11 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="p-8 space-y-6"
+              className="p-4 md:p-8 space-y-4 md:space-y-6"
             >
             <div>
-              <h1 className="text-4xl font-bold mb-2">All {themeConfig.questLabel}s</h1>
-              <p className="text-muted-foreground">Your journey across all realms</p>
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">All {themeConfig.questLabel}s</h1>
+              <p className="text-sm md:text-base text-muted-foreground">Your journey across all realms</p>
             </div>
 
             <QuickStats
@@ -558,11 +594,11 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
             />
 
             {(!quests || quests.length === 0) ? (
-              <div className="glass-panel p-12 text-center">
+              <div className="glass-panel p-8 md:p-12 text-center">
                 <p className="text-muted-foreground">No quests available</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-3 md:gap-4">
                 {quests.map((quest) => (
                   <QuestCard
                     key={quest.id}

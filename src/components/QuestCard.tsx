@@ -38,26 +38,26 @@ export function QuestCard({ quest, theme, onClick, isLocked }: QuestCardProps) {
 
   return (
     <Card 
-      className={`glass-panel p-6 cursor-pointer transition-all hover:scale-105 hover:shadow-xl border-2 ${getStatusColor()} ${isLocked ? 'opacity-50' : ''}`}
+      className={`glass-panel p-4 md:p-6 cursor-pointer transition-all hover:scale-105 hover:shadow-xl border-2 ${getStatusColor()} ${isLocked ? 'opacity-50' : ''}`}
       onClick={() => !isLocked && onClick()}
     >
-      <div className="flex items-start gap-4">
-        <div className={`p-3 rounded-lg ${quest.type === 'boss' ? 'bg-destructive/20' : 'bg-primary/20'}`}>
+      <div className="flex items-start gap-3 md:gap-4">
+        <div className={`p-2 md:p-3 rounded-lg flex-shrink-0 ${quest.type === 'boss' ? 'bg-destructive/20' : 'bg-primary/20'}`}>
           {getQuestIcon()}
         </div>
-        <div className="flex-1 space-y-2">
+        <div className="flex-1 space-y-2 min-w-0">
           <div className="flex items-start justify-between gap-2">
-            <h3 className="font-bold text-lg leading-tight">{quest.name}</h3>
-            {getStatusIcon()}
+            <h3 className="font-bold text-base md:text-lg leading-tight">{quest.name}</h3>
+            <div className="flex-shrink-0">{getStatusIcon()}</div>
           </div>
-          <p className="text-sm text-muted-foreground line-clamp-2">{quest.description}</p>
+          <p className="text-xs md:text-sm text-muted-foreground line-clamp-2">{quest.description}</p>
           <div className="flex items-center gap-2 flex-wrap">
             <Badge variant="secondary" className="text-xs">
               {quest.xpValue} {themeConfig.xpLabel}
             </Badge>
             {quest.type === 'boss' && (
               <Badge variant="destructive" className="text-xs">
-                Boss Battle
+                Boss
               </Badge>
             )}
             {quest.type === 'redemption' && (
@@ -66,7 +66,7 @@ export function QuestCard({ quest, theme, onClick, isLocked }: QuestCardProps) {
               </Badge>
             )}
             {quest.dueDate && (
-              <span className="text-xs text-muted-foreground ml-auto">
+              <span className="text-xs text-muted-foreground ml-auto whitespace-nowrap">
                 Due {formatTimeAgo(quest.dueDate)}
               </span>
             )}
