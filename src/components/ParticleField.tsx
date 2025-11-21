@@ -23,7 +23,11 @@ export function ParticleField({ count = 50, speed = 0.3 }: ParticleFieldProps) {
     const canvas = canvasRef.current
     if (!canvas) return
 
+    let isMounted = true
+    let animationId: number
+
     const updateDimensions = () => {
+      if (!isMounted || !canvas) return
       dimensionsRef.current = {
         width: window.innerWidth,
         height: window.innerHeight
@@ -47,9 +51,9 @@ export function ParticleField({ count = 50, speed = 0.3 }: ParticleFieldProps) {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    let animationId: number
-
     const animate = () => {
+      if (!isMounted || !canvas || !ctx) return
+
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
       particlesRef.current.forEach((particle) => {
@@ -91,6 +95,7 @@ export function ParticleField({ count = 50, speed = 0.3 }: ParticleFieldProps) {
     animate()
 
     return () => {
+      isMounted = false
       cancelAnimationFrame(animationId)
       window.removeEventListener('resize', updateDimensions)
     }

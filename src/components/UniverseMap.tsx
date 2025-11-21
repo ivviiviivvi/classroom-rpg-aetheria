@@ -185,6 +185,23 @@ function Scene({ realms, onRealmClick, theme }: Omit<UniverseMapProps, 'theme'> 
 }
 
 export function UniverseMap({ realms, theme, onRealmClick }: UniverseMapProps) {
+  const [isReady, setIsReady] = useState(false)
+
+  useEffect(() => {
+    setIsReady(true)
+    return () => {
+      setIsReady(false)
+    }
+  }, [])
+
+  if (!isReady) {
+    return (
+      <div className="w-full h-full relative flex items-center justify-center">
+        <div className="text-muted-foreground">Loading universe...</div>
+      </div>
+    )
+  }
+
   return (
     <div className="w-full h-full relative">
       <Canvas

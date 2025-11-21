@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
+import { ErrorBoundary } from 'react-error-boundary'
 import { useTheme, useRole } from '@/hooks/use-theme'
 import { HUDSidebar } from '@/components/HUDSidebar'
 import { UniverseMap } from '@/components/UniverseMap'
@@ -360,7 +361,9 @@ function App() {
       <ParticleField count={40} speed={0.2} />
       
       {(currentView === 'realm-detail' || currentView === 'constellation') && selectedRealm && (
-        <ThemeBackground3D theme={currentTheme} realmColor={selectedRealm.color} />
+        <ErrorBoundary fallback={<></>}>
+          <ThemeBackground3D theme={currentTheme} realmColor={selectedRealm.color} />
+        </ErrorBoundary>
       )}
       
       <Dialog open={showNameDialog} onOpenChange={() => {}}>
@@ -429,11 +432,22 @@ function App() {
               transition={{ duration: 0.3 }}
               className="h-full relative"
             >
-            <UniverseMap
-              realms={realms || []}
-              theme={currentTheme}
-              onRealmClick={handleRealmClick}
-            />
+            <ErrorBoundary
+              fallback={
+                <div className="h-full flex items-center justify-center">
+                  <div className="glass-panel p-8 text-center space-y-4">
+                    <p className="text-muted-foreground">Unable to load 3D universe map</p>
+                    <Button onClick={() => window.location.reload()}>Reload</Button>
+                  </div>
+                </div>
+              }
+            >
+              <UniverseMap
+                realms={realms || []}
+                theme={currentTheme}
+                onRealmClick={handleRealmClick}
+              />
+            </ErrorBoundary>
             <div className="absolute top-8 left-1/2 -translate-x-1/2 text-center space-y-2">
               <h1 className="text-5xl font-bold glow-text">Aetheria</h1>
               <p className="text-lg text-muted-foreground">The Living Classroom</p>

@@ -20,13 +20,16 @@ export function ThemeBackground3D({ theme, realmColor }: ThemeBackground3DProps)
   useEffect(() => {
     if (!containerRef.current) return
 
+    let isMounted = true
+    const container = containerRef.current
+
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true })
     
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    containerRef.current.appendChild(renderer.domElement)
+    container.appendChild(renderer.domElement)
 
     camera.position.z = 5
 
@@ -208,7 +211,10 @@ export function ThemeBackground3D({ theme, realmColor }: ThemeBackground3DProps)
     scene.add(ambientLight)
 
     let time = 0
+    let frameId = 0
     const animate = () => {
+      if (!isMounted) return
+      
       time += 0.01
 
       objects.forEach((obj, index) => {
@@ -221,15 +227,13 @@ export function ThemeBackground3D({ theme, realmColor }: ThemeBackground3DProps)
       })
 
       renderer.render(scene, camera)
-      const frameId = requestAnimationFrame(animate)
-      if (sceneRef.current) {
-        sceneRef.current.frameId = frameId
-      }
+      frameId = requestAnimationFrame(animate)
     }
 
     animate()
 
     const handleResize = () => {
+      if (!isMounted) return
       camera.aspect = window.innerWidth / window.innerHeight
       camera.updateProjectionMatrix()
       renderer.setSize(window.innerWidth, window.innerHeight)
@@ -237,36 +241,39 @@ export function ThemeBackground3D({ theme, realmColor }: ThemeBackground3DProps)
 
     window.addEventListener('resize', handleResize)
 
-    sceneRef.current = { scene, camera, renderer, objects, frameId: 0 }
+    sceneRef.current = { scene, camera, renderer, objects, frameId }
 
     return () => {
+      isMounted = false
       window.removeEventListener('resize', handleResize)
-      if (sceneRef.current) {
-        cancelAnimationFrame(sceneRef.current.frameId)
-        
-        sceneRef.current.objects.forEach(obj => {
-          if (obj instanceof THREE.Mesh) {
-            obj.geometry?.dispose()
-            if (obj.material) {
-              if (Array.isArray(obj.material)) {
-                obj.material.forEach(mat => mat.dispose())
-              } else {
-                obj.material.dispose()
-              }
+      cancelAnimationFrame(frameId)
+      
+      objects.forEach(obj => {
+        if (obj instanceof THREE.Mesh || obj instanceof THREE.Points) {
+          obj.geometry?.dispose()
+          if (obj.material) {
+            if (Array.isArray(obj.material)) {
+              obj.material.forEach(mat => mat.dispose())
+            } else {
+              obj.material.dispose()
             }
           }
-        })
-        
-        sceneRef.current.scene.clear()
-        sceneRef.current.renderer.dispose()
-        sceneRef.current.renderer.forceContextLoss()
-        
-        if (containerRef.current && sceneRef.current.renderer.domElement.parentNode === containerRef.current) {
-          containerRef.current.removeChild(sceneRef.current.renderer.domElement)
         }
-        
-        sceneRef.current = null
+      })
+      
+      scene.clear()
+      renderer.dispose()
+      
+      try {
+        renderer.forceContextLoss()
+      } catch (e) {
       }
+      
+      if (container && renderer.domElement && renderer.domElement.parentNode === container) {
+        container.removeChild(renderer.domElement)
+      }
+      
+      sceneRef.current = null
     }
   }, [theme, realmColor])
 
