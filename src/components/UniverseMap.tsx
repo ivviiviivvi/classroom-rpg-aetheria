@@ -3,6 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Sphere, Stars, Text, Line } from '@react-three/drei'
 import * as THREE from 'three'
 import { Realm, Theme } from '@/lib/types'
+import { SafeCanvasWrapper } from './SafeCanvas'
 
 interface UniverseMapProps {
   realms: Realm[]
@@ -24,15 +25,16 @@ function Planet({ realm, position, onClick, theme }: PlanetProps) {
   const isMountedRef = useRef(true)
 
   useEffect(() => {
+    isMountedRef.current = true
     return () => {
       isMountedRef.current = false
     }
   }, [])
 
   useFrame((state) => {
-    if (!isMountedRef.current) return
+    if (!isMountedRef.current || !meshRef.current || !groupRef.current) return
     
-    if (meshRef.current) {
+    try {
       meshRef.current.rotation.y += 0.002
       
       if (hovered) {
@@ -40,21 +42,32 @@ function Planet({ realm, position, onClick, theme }: PlanetProps) {
       } else {
         meshRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1)
       }
-    }
-    
-    if (groupRef.current) {
+      
       const time = state.clock.getElapsedTime()
       groupRef.current.position.y = position[1] + Math.sin(time + position[0]) * 0.1
+    } catch (error) {
+      return
     }
   })
 
-  const handleClick = () => {
+  const handleClick = (e: any) => {
+    e.stopPropagation()
     if (!isMountedRef.current) return
-    setTimeout(() => {
-      if (isMountedRef.current) {
-        onClick()
-      }
-    }, 100)
+    onClick()
+  }
+
+  const handlePointerOver = (e: any) => {
+    e.stopPropagation()
+    if (isMountedRef.current) {
+      setHovered(true)
+    }
+  }
+
+  const handlePointerOut = (e: any) => {
+    e.stopPropagation()
+    if (isMountedRef.current) {
+      setHovered(false)
+    }
   }
 
   const color = useMemo(() => {
@@ -71,8 +84,8 @@ function Planet({ realm, position, onClick, theme }: PlanetProps) {
         ref={meshRef}
         args={[1, 32, 32]}
         onClick={handleClick}
-        onPointerOver={() => isMountedRef.current && setHovered(true)}
-        onPointerOut={() => isMountedRef.current && setHovered(false)}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
       >
         <meshStandardMaterial
           color={color}
@@ -138,6 +151,15 @@ function OrbitRing({ radius, color, segments = 128 }: { radius: number; color: s
 }
 
 function Scene({ realms, onRealmClick, theme }: Omit<UniverseMapProps, 'theme'> & { theme: Theme }) {
+  const isMountedRef = useRef(true)
+  
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
+
   const positions: Array<[number, number, number]> = useMemo(() => 
     realms.map((_, index) => {
       const angle = (index / realms.length) * Math.PI * 2
@@ -149,6 +171,10 @@ function Scene({ realms, onRealmClick, theme }: Omit<UniverseMapProps, 'theme'> 
       ] as [number, number, number]
     })
   , [realms])
+
+  if (!isMountedRef.current) {
+    return null
+  }
 
   if (realms.length === 0) {
     return (
@@ -235,14 +261,24 @@ function Scene({ realms, onRealmClick, theme }: Omit<UniverseMapProps, 'theme'> 
 export function UniverseMap({ realms, theme, onRealmClick }: UniverseMapProps) {
   const [isReady, setIsReady] = useState(false)
   const [hasError, setHasError] = useState(false)
-  const canvasKey = useMemo(() => `canvas-${realms.length}-${Date.now()}`, [realms.length])
+  const mountedRef = useRef(true)
+  const canvasKey = useRef(`canvas-${Date.now()}`)
 
   useEffect(() => {
+    mountedRef.current = true
+    canvasKey.current = `canvas-${Date.now()}`
     setHasError(false)
-    const timer = setTimeout(() => setIsReady(true), 100)
+    
+    const timer = setTimeout(() => {
+      if (mountedRef.current) {
+        setIsReady(true)
+      }
+    }, 100)
+    
     return () => {
-      clearTimeout(timer)
+      mountedRef.current = false
       setIsReady(false)
+      clearTimeout(timer)
     }
   }, [])
 
@@ -253,9 +289,15 @@ export function UniverseMap({ realms, theme, onRealmClick }: UniverseMapProps) {
           <p className="text-muted-foreground">Unable to load 3D universe</p>
           <button 
             onClick={() => {
+              mountedRef.current = true
+              canvasKey.current = `canvas-${Date.now()}`
               setHasError(false)
               setIsReady(false)
-              setTimeout(() => setIsReady(true), 100)
+              setTimeout(() => {
+                if (mountedRef.current) {
+                  setIsReady(true)
+                }
+              }, 100)
             }}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
           >
@@ -275,28 +317,36 @@ export function UniverseMap({ realms, theme, onRealmClick }: UniverseMapProps) {
   }
 
   return (
-    <div className="w-full h-full relative">
-      <Canvas
-        key={canvasKey}
-        camera={{ position: [0, 8, 15], fov: 60 }}
-        gl={{ 
-          antialias: true, 
-          alpha: true,
-          powerPreference: 'high-performance',
-          preserveDrawingBuffer: false
-        }}
-        frameloop="always"
-        dpr={[1, 2]}
-        onCreated={(state) => {
-          state.gl.setClearColor(0x000000, 0)
-        }}
-      >
-        <Scene realms={realms} onRealmClick={onRealmClick} theme={theme} />
-      </Canvas>
-      
-      <div className="absolute bottom-8 right-8 glass-panel px-4 py-2 text-xs text-muted-foreground pointer-events-none">
-        Drag to rotate • Scroll to zoom • Click planets to explore
+    <SafeCanvasWrapper>
+      <div className="w-full h-full relative">
+        <Canvas
+          key={canvasKey.current}
+          camera={{ position: [0, 8, 15], fov: 60 }}
+          gl={{ 
+            antialias: true, 
+            alpha: true,
+            powerPreference: 'high-performance',
+            preserveDrawingBuffer: false
+          }}
+          frameloop="always"
+          dpr={[1, 2]}
+          onCreated={(state) => {
+            try {
+              if (mountedRef.current) {
+                state.gl.setClearColor(0x000000, 0)
+              }
+            } catch (error) {
+              console.error('Error setting up Canvas:', error)
+            }
+          }}
+        >
+          <Scene realms={realms} onRealmClick={onRealmClick} theme={theme} />
+        </Canvas>
+        
+        <div className="absolute bottom-8 right-8 glass-panel px-4 py-2 text-xs text-muted-foreground pointer-events-none">
+          Drag to rotate • Scroll to zoom • Click planets to explore
+        </div>
       </div>
-    </div>
+    </SafeCanvasWrapper>
   )
 }

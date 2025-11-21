@@ -362,7 +362,12 @@ function App() {
       <ParticleField count={40} speed={0.2} />
       
       {(currentView === 'realm-detail' || currentView === 'constellation') && selectedRealm && (
-        <ErrorBoundary fallback={<div />} FallbackComponent={undefined}>
+        <ErrorBoundary 
+          fallback={<div className="hidden" />}
+          onError={(error) => {
+            console.error('3D Background error:', error)
+          }}
+        >
           <ThemeBackground3D theme={currentTheme} realmColor={selectedRealm.color} />
         </ErrorBoundary>
       )}
@@ -434,8 +439,18 @@ function App() {
               className="h-full relative"
             >
             <ErrorBoundary
-              FallbackComponent={ErrorFallback}
-              onReset={() => window.location.reload()}
+              FallbackComponent={({ resetErrorBoundary }) => (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="glass-panel p-8 text-center space-y-4">
+                    <p className="text-muted-foreground">Unable to load 3D universe</p>
+                    <Button onClick={resetErrorBoundary}>Retry</Button>
+                  </div>
+                </div>
+              )}
+              onReset={() => {
+                setCurrentView('quests')
+                setTimeout(() => setCurrentView('world-map'), 100)
+              }}
             >
               <UniverseMap
                 realms={realms || []}
