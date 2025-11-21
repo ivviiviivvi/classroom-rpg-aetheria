@@ -243,8 +243,29 @@ export function ThemeBackground3D({ theme, realmColor }: ThemeBackground3DProps)
       window.removeEventListener('resize', handleResize)
       if (sceneRef.current) {
         cancelAnimationFrame(sceneRef.current.frameId)
+        
+        sceneRef.current.objects.forEach(obj => {
+          if (obj instanceof THREE.Mesh) {
+            obj.geometry?.dispose()
+            if (obj.material) {
+              if (Array.isArray(obj.material)) {
+                obj.material.forEach(mat => mat.dispose())
+              } else {
+                obj.material.dispose()
+              }
+            }
+          }
+        })
+        
+        sceneRef.current.scene.clear()
         sceneRef.current.renderer.dispose()
-        containerRef.current?.removeChild(sceneRef.current.renderer.domElement)
+        sceneRef.current.renderer.forceContextLoss()
+        
+        if (containerRef.current && sceneRef.current.renderer.domElement.parentNode === containerRef.current) {
+          containerRef.current.removeChild(sceneRef.current.renderer.domElement)
+        }
+        
+        sceneRef.current = null
       }
     }
   }, [theme, realmColor])

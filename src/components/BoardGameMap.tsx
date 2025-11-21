@@ -1,6 +1,6 @@
 import { useRef, useState, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, Sphere, Cylinder, Text, Plane } from '@react-three/drei'
+import { OrbitControls, Sphere, Cylinder, Text, Plane, Line } from '@react-three/drei'
 import * as THREE from 'three'
 import { Quest, Theme } from '@/lib/types'
 import { motion } from 'framer-motion'
@@ -27,18 +27,21 @@ interface PathNodeProps {
 
 function PathNode({ quest, position, onClick, color, isLocked, index }: PathNodeProps) {
   const meshRef = useRef<THREE.Mesh>(null)
+  const groupRef = useRef<THREE.Group>(null)
   const [hovered, setHovered] = useState(false)
 
   useFrame((state) => {
     if (meshRef.current) {
-      const time = state.clock.getElapsedTime()
-      meshRef.current.position.y = position[1] + Math.sin(time * 2 + index) * 0.05
-      
       if (hovered && !isLocked) {
         meshRef.current.scale.lerp(new THREE.Vector3(1.3, 1.3, 1.3), 0.1)
       } else {
         meshRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1)
       }
+    }
+    
+    if (groupRef.current) {
+      const time = state.clock.getElapsedTime()
+      groupRef.current.position.y = position[1] + Math.sin(time * 2 + index) * 0.05
     }
   })
 
@@ -53,7 +56,7 @@ function PathNode({ quest, position, onClick, color, isLocked, index }: PathNode
   const emissiveIntensity = isLocked ? 0.1 : hovered ? 0.8 : 0.4
 
   return (
-    <group position={position}>
+    <group ref={groupRef} position={position}>
       <Sphere
         ref={meshRef}
         args={[0.3, 32, 32]}
@@ -140,10 +143,9 @@ function PathNode({ quest, position, onClick, color, isLocked, index }: PathNode
 }
 
 function PathSegment({ from, to, color }: { from: [number, number, number]; to: [number, number, number]; color: string }) {
-  const geometry = useMemo(() => {
+  const points = useMemo(() => {
     const start = new THREE.Vector3(...from)
     const end = new THREE.Vector3(...to)
-    const distance = start.distanceTo(end)
     const midHeight = Math.max(from[1], to[1]) + 0.3
     
     const curve = new THREE.QuadraticBezierCurve3(
@@ -156,14 +158,17 @@ function PathSegment({ from, to, color }: { from: [number, number, number]; to: 
       end
     )
     
-    const points = curve.getPoints(50)
-    return new THREE.BufferGeometry().setFromPoints(points)
+    return curve.getPoints(50)
   }, [from, to])
 
   return (
-    <lineSegments geometry={geometry}>
-      <lineBasicMaterial color={color} linewidth={2} transparent opacity={0.6} />
-    </lineSegments>
+    <Line
+      points={points}
+      color={color}
+      lineWidth={2}
+      transparent
+      opacity={0.6}
+    />
   )
 }
 
@@ -248,6 +253,8 @@ export function BoardGameMap({ quests, theme, onQuestClick, onBack, realmColor, 
       <Canvas
         camera={{ position: [4, 6, 8], fov: 60 }}
         gl={{ antialias: true, alpha: true }}
+        frameloop="always"
+        dpr={[1, 2]}
       >
         <Scene quests={quests} onQuestClick={onQuestClick} color={realmColor} />
       </Canvas>

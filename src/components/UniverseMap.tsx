@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, Sphere, Stars, Text } from '@react-three/drei'
+import { OrbitControls, Sphere, Stars, Text, Line } from '@react-three/drei'
 import * as THREE from 'three'
 import { Realm, Theme } from '@/lib/types'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -20,6 +20,7 @@ interface PlanetProps {
 
 function Planet({ realm, position, onClick, theme }: PlanetProps) {
   const meshRef = useRef<THREE.Mesh>(null)
+  const groupRef = useRef<THREE.Group>(null)
   const [hovered, setHovered] = useState(false)
   const [clicked, setClicked] = useState(false)
 
@@ -32,9 +33,11 @@ function Planet({ realm, position, onClick, theme }: PlanetProps) {
       } else {
         meshRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1)
       }
-
+    }
+    
+    if (groupRef.current) {
       const time = state.clock.getElapsedTime()
-      meshRef.current.position.y = position[1] + Math.sin(time + position[0]) * 0.1
+      groupRef.current.position.y = position[1] + Math.sin(time + position[0]) * 0.1
     }
   })
 
@@ -48,7 +51,7 @@ function Planet({ realm, position, onClick, theme }: PlanetProps) {
   const color = new THREE.Color(realm.color)
 
   return (
-    <group position={position}>
+    <group ref={groupRef} position={position}>
       <Sphere
         ref={meshRef}
         args={[1, 32, 32]}
@@ -108,12 +111,14 @@ function OrbitRing({ radius, color, segments = 128 }: { radius: number; color: s
     return pts
   }, [radius, segments])
   
-  const lineGeometry = useMemo(() => new THREE.BufferGeometry().setFromPoints(points), [points])
-  
   return (
-    <lineSegments geometry={lineGeometry}>
-      <lineBasicMaterial color={color} transparent opacity={0.3} />
-    </lineSegments>
+    <Line
+      points={points}
+      color={color}
+      lineWidth={1}
+      transparent
+      opacity={0.3}
+    />
   )
 }
 
@@ -185,6 +190,8 @@ export function UniverseMap({ realms, theme, onRealmClick }: UniverseMapProps) {
       <Canvas
         camera={{ position: [0, 8, 15], fov: 60 }}
         gl={{ antialias: true, alpha: true }}
+        frameloop="always"
+        dpr={[1, 2]}
       >
         <Scene realms={realms} onRealmClick={onRealmClick} theme={theme} />
       </Canvas>
