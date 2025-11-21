@@ -61,6 +61,34 @@ Aetheria transforms traditional Learning Management Systems into an immersive, g
 - **Progression**: Click "Edit Positions" → Full-screen editor opens → 3D scene displays with grid and axes → Teacher drags realm nodes or enters X/Y/Z coordinates → Visual feedback shows selected realm → Click "Save Changes" → Positions persist to storage → Editor closes → World Map reflects new positions
 - **Success Criteria**: Drag operations feel smooth (60fps); coordinate inputs update mesh in real-time; grid/axes provide spatial reference; "Reset Layout" returns to default circular arrangement; changes persist across sessions
 
+### Feature 8: Realm & Quest Creation with AI Assistance
+- **Functionality**: Teachers can create realms and quests with AI-generated descriptions that match the current theme
+- **Purpose**: Reduces teacher workload and ensures theme-consistent content while maintaining creative control
+- **Trigger**: Teacher clicks "Create Realm" or "Create Quest" buttons (visible when in teacher role)
+- **Progression**: Click create button → Dialog opens → Enter name → Click "AI Generate" → LLM generates theme-appropriate description → Review/edit description → Select color (realm) or type/XP (quest) → Click "Create" → Item added to system
+- **Success Criteria**: AI generation completes in <5 seconds; descriptions match theme vocabulary; teachers can edit AI output; created items immediately visible in UI
+
+### Feature 9: Teacher Management Dashboard
+- **Functionality**: Centralized view for teachers to see all realms, quests, and student submissions with statistics
+- **Purpose**: Provides oversight of the entire learning system and enables content management
+- **Trigger**: Teacher navigates to "Manage" from sidebar
+- **Progression**: Open dashboard → View summary cards (realm count, quest count, submission count) → Browse realm list with quest counts → Browse quest list with completion stats → Click "View" on quest to see all submissions → Click delete on realm/quest to remove
+- **Success Criteria**: Stats update in real-time; submission details show student responses and AI feedback; delete operations prevent orphaned data; dashboard is read-only for students
+
+### Feature 10: Leaderboard
+- **Functionality**: Displays all users ranked by XP with level, title, and artifact count
+- **Purpose**: Adds competitive motivation and social comparison to encourage engagement
+- **Trigger**: User navigates to "Leaderboard" from sidebar
+- **Progression**: Open leaderboard → Users load sorted by XP descending → Top 3 highlighted with trophy/medal icons → Current user highlighted with ring → Scroll to see all participants
+- **Success Criteria**: Rankings update when any user gains XP; current user always visible/highlighted; top 3 have distinct visual treatment
+
+### Feature 11: Welcome Dialog with Name Entry
+- **Functionality**: First-time users are prompted to enter their hero name before accessing the app
+- **Purpose**: Personalizes the experience and establishes user identity in the system
+- **Trigger**: App loads and detects no user name in profile
+- **Progression**: App loads → Name dialog appears (modal, non-dismissible) → User enters name → Clicks "Begin Adventure" → Profile created with unique ID → Dialog closes → User enters app
+- **Success Criteria**: Dialog blocks all interaction until name entered; name persists across sessions; profile gets unique ID for leaderboard tracking
+
 ## Edge Case Handling
 
 - **Empty States**: New users see a tutorial Realm with sample Quest; empty inventories show "No artifacts yet" with encouraging message; empty Archives show placeholder for first Knowledge Crystal

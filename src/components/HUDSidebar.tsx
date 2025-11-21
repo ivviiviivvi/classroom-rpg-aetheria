@@ -3,7 +3,7 @@ import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { House, User, BookOpen, Target, Sword, Brain, Shield, GraduationCap, ArrowsClockwise, Palette } from '@phosphor-icons/react'
+import { House, User, BookOpen, Target, Sword, Brain, Shield, GraduationCap, ArrowsClockwise, Palette, Trophy, ChalkboardTeacher } from '@phosphor-icons/react'
 import { Theme, Role, THEME_CONFIGS } from '@/lib/types'
 import { UserProfile } from '@/lib/types'
 import { calculateLevel, getLevelTitle, getXpForNextLevel } from '@/lib/game-utils'
@@ -103,6 +103,24 @@ export function HUDSidebar({
           <User size={20} />
           My Hero
         </Button>
+        <Button
+          variant={currentView === 'leaderboard' ? 'default' : 'ghost'}
+          className="w-full justify-start gap-3"
+          onClick={() => onNavigate('leaderboard')}
+        >
+          <Trophy size={20} />
+          Leaderboard
+        </Button>
+        {role === 'teacher' && (
+          <Button
+            variant={currentView === 'teacher-dashboard' ? 'default' : 'ghost'}
+            className="w-full justify-start gap-3"
+            onClick={() => onNavigate('teacher-dashboard')}
+          >
+            <ChalkboardTeacher size={20} />
+            Manage
+          </Button>
+        )}
       </nav>
 
       <Separator className="bg-border" />

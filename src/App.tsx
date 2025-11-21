@@ -4,15 +4,22 @@ import { useTheme, useRole } from '@/hooks/use-theme'
 import { HUDSidebar } from '@/components/HUDSidebar'
 import { RealmMap } from '@/components/RealmMap'
 import { RealmEditor } from '@/components/RealmEditor'
+import { RealmCreator } from '@/components/RealmCreator'
+import { QuestCreator } from '@/components/QuestCreator'
 import { QuestCard } from '@/components/QuestCard'
 import { QuestDialog } from '@/components/QuestDialog'
 import { ConstellationView } from '@/components/ConstellationView'
 import { CharacterSheet } from '@/components/CharacterSheet'
 import { ArchivesView } from '@/components/ArchivesView'
+import { Leaderboard } from '@/components/Leaderboard'
+import { TeacherDashboard } from '@/components/TeacherDashboard'
 import { Button } from '@/components/ui/button'
-import { Plus, Target, Pencil } from '@phosphor-icons/react'
+import { Plus, Target, Pencil, Sparkle } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'sonner'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import type { 
   Realm, 
   Quest, 
@@ -32,7 +39,7 @@ import { THEME_CONFIGS } from '@/lib/types'
 
 const DEFAULT_PROFILE: UserProfile = {
   id: 'user-1',
-  name: 'Hero',
+  name: '',
   role: 'student',
   xp: 0,
   level: 1,
@@ -46,12 +53,17 @@ function App() {
   const [selectedRealmId, setSelectedRealmId] = useState<string | null>(null)
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null)
   const [isEditingRealms, setIsEditingRealms] = useState(false)
+  const [isCreatingRealm, setIsCreatingRealm] = useState(false)
+  const [isCreatingQuest, setIsCreatingQuest] = useState(false)
+  const [showNameDialog, setShowNameDialog] = useState(false)
+  const [nameInput, setNameInput] = useState('')
   
   const [realms, setRealms] = useKV<Realm[]>('aetheria-realms', [])
   const [quests, setQuests] = useKV<Quest[]>('aetheria-quests', [])
   const [submissions, setSubmissions] = useKV<Submission[]>('aetheria-submissions', [])
   const [crystals, setCrystals] = useKV<KnowledgeCrystal[]>('aetheria-crystals', [])
   const [profile, setProfile] = useKV<UserProfile>('aetheria-profile', DEFAULT_PROFILE)
+  const [allProfiles, setAllProfiles] = useKV<UserProfile[]>('aetheria-all-profiles', [])
 
   const currentTheme = theme || 'fantasy'
   const currentRole = role || 'student'
@@ -59,11 +71,30 @@ function App() {
   const currentProfile = profile || DEFAULT_PROFILE
 
   useEffect(() => {
+    if (!profile?.name || profile.name === '') {
+      setShowNameDialog(true)
+    }
+  }, [profile])
+
+  useEffect(() => {
     if (role && profile) {
       const updatedProfile: UserProfile = { ...profile, role }
       setProfile(updatedProfile)
     }
   }, [role])
+
+  useEffect(() => {
+    if (profile && allProfiles) {
+      const existingIndex = allProfiles.findIndex(p => p.id === profile.id)
+      if (existingIndex >= 0) {
+        const updated = [...allProfiles]
+        updated[existingIndex] = profile
+        setAllProfiles(updated)
+      } else {
+        setAllProfiles([...allProfiles, profile])
+      }
+    }
+  }, [profile])
 
   const handleThemeChange = () => {
     const themes: Theme[] = ['fantasy', 'scifi', 'medieval', 'modern']
@@ -235,12 +266,78 @@ function App() {
     setRealms(updatedRealms)
   }
 
+  const handleCreateRealm = (realm: Realm) => {
+    setRealms((current) => [...(current || []), realm])
+    setIsCreatingRealm(false)
+  }
+
+  const handleCreateQuest = (quest: Quest) => {
+    setQuests((current) => [...(current || []), quest])
+    setIsCreatingQuest(false)
+  }
+
+  const handleDeleteQuest = (questId: string) => {
+    setQuests((current) => (current || []).filter(q => q.id !== questId))
+    setSubmissions((current) => (current || []).filter(s => s.questId !== questId))
+    setCrystals((current) => (current || []).filter(c => c.questId !== questId))
+  }
+
+  const handleDeleteRealm = (realmId: string) => {
+    setRealms((current) => (current || []).filter(r => r.id !== realmId))
+  }
+
+  const handleSetName = () => {
+    if (!nameInput.trim()) {
+      toast.error('Please enter a name')
+      return
+    }
+    const updatedProfile: UserProfile = { 
+      ...currentProfile, 
+      name: nameInput.trim(),
+      id: `user-${Date.now()}`
+    }
+    setProfile(updatedProfile)
+    setShowNameDialog(false)
+    toast.success(`Welcome, ${nameInput.trim()}!`)
+  }
+
   const selectedRealm = realms?.find(r => r.id === selectedRealmId)
   const realmQuests = quests?.filter(q => q.realmId === selectedRealmId) || []
   const selectedQuest = quests?.find(q => q.id === selectedQuestId) || null
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
+      <Dialog open={showNameDialog} onOpenChange={() => {}}>
+        <DialogContent className="glass-panel" onPointerDownOutside={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <Sparkle size={32} weight="fill" className="text-accent" />
+              <DialogTitle className="text-2xl">Welcome to Aetheria</DialogTitle>
+            </div>
+            <DialogDescription className="text-base">
+              Enter your hero name to begin your journey through the living classroom
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="hero-name">Your Name</Label>
+              <Input
+                id="hero-name"
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                placeholder="Enter your name..."
+                className="glass-panel"
+                onKeyDown={(e) => e.key === 'Enter' && handleSetName()}
+              />
+            </div>
+            <Button onClick={handleSetName} className="w-full gap-2" size="lg">
+              <Sparkle size={20} weight="fill" />
+              Begin Adventure
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <HUDSidebar
         profile={currentProfile}
         theme={currentTheme}
@@ -278,9 +375,17 @@ function App() {
             )}
             {(realms?.length === 0 || !realms) && currentRole === 'teacher' && (
               <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-                <Button size="lg" className="gap-2">
+                <Button size="lg" className="gap-2" onClick={() => setIsCreatingRealm(true)}>
                   <Plus size={24} weight="bold" />
                   Create Your First {themeConfig.realmLabel}
+                </Button>
+              </div>
+            )}
+            {currentRole === 'teacher' && (realms?.length ?? 0) > 0 && (
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
+                <Button size="lg" className="gap-2" onClick={() => setIsCreatingRealm(true)}>
+                  <Plus size={24} weight="bold" />
+                  Add {themeConfig.realmLabel}
                 </Button>
               </div>
             )}
@@ -299,6 +404,12 @@ function App() {
                 <Target size={20} />
                 View Constellation
               </Button>
+              {currentRole === 'teacher' && (
+                <Button onClick={() => setIsCreatingQuest(true)} className="gap-2">
+                  <Plus size={20} weight="bold" />
+                  Create {themeConfig.questLabel}
+                </Button>
+              )}
             </div>
 
             <div className="space-y-4">
@@ -376,6 +487,25 @@ function App() {
             theme={currentTheme}
           />
         )}
+
+        {currentView === 'leaderboard' && (
+          <Leaderboard
+            profiles={allProfiles || []}
+            theme={currentTheme}
+            currentUserId={currentProfile.id}
+          />
+        )}
+
+        {currentView === 'teacher-dashboard' && currentRole === 'teacher' && (
+          <TeacherDashboard
+            quests={quests || []}
+            submissions={submissions || []}
+            realms={realms || []}
+            theme={currentTheme}
+            onDeleteQuest={handleDeleteQuest}
+            onDeleteRealm={handleDeleteRealm}
+          />
+        )}
       </main>
 
       <QuestDialog
@@ -394,6 +524,22 @@ function App() {
           onClose={() => setIsEditingRealms(false)}
         />
       )}
+
+      <RealmCreator
+        open={isCreatingRealm}
+        theme={currentTheme}
+        onClose={() => setIsCreatingRealm(false)}
+        onCreate={handleCreateRealm}
+      />
+
+      <QuestCreator
+        open={isCreatingQuest}
+        theme={currentTheme}
+        realmId={selectedRealmId || ''}
+        realm={selectedRealm}
+        onClose={() => setIsCreatingQuest(false)}
+        onCreate={handleCreateQuest}
+      />
 
       <Toaster position="top-right" />
     </div>
