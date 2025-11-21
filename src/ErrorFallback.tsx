@@ -1,8 +1,7 @@
 import { FallbackProps } from "react-error-boundary";
-import { Alert, AlertTitle, AlertDescription } from "./components/ui/alert";
-import { Button } from "./components/ui/button";
-
-import { AlertTriangleIcon, RefreshCwIcon } from "lucide-react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Triangle, ArrowClockwise } from "@phosphor-icons/react";
 
 export const ErrorFallback = ({ error, resetErrorBoundary }: FallbackProps) => {
   if (import.meta.env.DEV) throw error;
@@ -11,7 +10,7 @@ export const ErrorFallback = ({ error, resetErrorBoundary }: FallbackProps) => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Alert variant="destructive" className="mb-6">
-          <AlertTriangleIcon />
+          <Triangle size={20} weight="fill" />
           <AlertTitle>This spark has encountered a runtime error</AlertTitle>
           <AlertDescription>
             Something unexpected happened while running the application. The error details are shown below. Contact the spark author and let them know about this issue.
@@ -27,10 +26,10 @@ export const ErrorFallback = ({ error, resetErrorBoundary }: FallbackProps) => {
         
         <Button 
           onClick={resetErrorBoundary} 
-          className="w-full"
+          className="w-full gap-2"
           variant="outline"
         >
-          <RefreshCwIcon />
+          <ArrowClockwise size={20} />
           Try Again
         </Button>
       </div>
