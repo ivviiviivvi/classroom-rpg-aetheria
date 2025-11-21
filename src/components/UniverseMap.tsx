@@ -3,7 +3,6 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Sphere, Stars, Text, Line } from '@react-three/drei'
 import * as THREE from 'three'
 import { Realm, Theme } from '@/lib/types'
-import { motion, AnimatePresence } from 'framer-motion'
 
 interface UniverseMapProps {
   realms: Realm[]
@@ -22,9 +21,17 @@ function Planet({ realm, position, onClick, theme }: PlanetProps) {
   const meshRef = useRef<THREE.Mesh>(null)
   const groupRef = useRef<THREE.Group>(null)
   const [hovered, setHovered] = useState(false)
-  const [clicked, setClicked] = useState(false)
+  const isMountedRef = useRef(true)
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   useFrame((state) => {
+    if (!isMountedRef.current) return
+    
     if (meshRef.current) {
       meshRef.current.rotation.y += 0.002
       
@@ -42,13 +49,21 @@ function Planet({ realm, position, onClick, theme }: PlanetProps) {
   })
 
   const handleClick = () => {
-    setClicked(true)
+    if (!isMountedRef.current) return
     setTimeout(() => {
-      onClick()
-    }, 300)
+      if (isMountedRef.current) {
+        onClick()
+      }
+    }, 100)
   }
 
-  const color = new THREE.Color(realm.color)
+  const color = useMemo(() => {
+    try {
+      return new THREE.Color(realm.color)
+    } catch {
+      return new THREE.Color(0x4a90e2)
+    }
+  }, [realm.color])
 
   return (
     <group ref={groupRef} position={position}>
@@ -56,8 +71,8 @@ function Planet({ realm, position, onClick, theme }: PlanetProps) {
         ref={meshRef}
         args={[1, 32, 32]}
         onClick={handleClick}
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
+        onPointerOver={() => isMountedRef.current && setHovered(true)}
+        onPointerOut={() => isMountedRef.current && setHovered(false)}
       >
         <meshStandardMaterial
           color={color}
@@ -123,15 +138,48 @@ function OrbitRing({ radius, color, segments = 128 }: { radius: number; color: s
 }
 
 function Scene({ realms, onRealmClick, theme }: Omit<UniverseMapProps, 'theme'> & { theme: Theme }) {
-  const positions: Array<[number, number, number]> = realms.map((_, index) => {
-    const angle = (index / realms.length) * Math.PI * 2
-    const radius = 3 + index * 1.5
-    return [
-      Math.cos(angle) * radius,
-      (Math.random() - 0.5) * 2,
-      Math.sin(angle) * radius
-    ]
-  })
+  const positions: Array<[number, number, number]> = useMemo(() => 
+    realms.map((_, index) => {
+      const angle = (index / realms.length) * Math.PI * 2
+      const radius = 3 + index * 1.5
+      return [
+        Math.cos(angle) * radius,
+        0,
+        Math.sin(angle) * radius
+      ] as [number, number, number]
+    })
+  , [realms])
+
+  if (realms.length === 0) {
+    return (
+      <>
+        <ambientLight intensity={0.3} />
+        <pointLight position={[10, 10, 10]} intensity={1} />
+        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+        
+        <Sphere args={[0.5, 32, 32]} position={[0, 0, 0]}>
+          <meshStandardMaterial
+            color="#ffd700"
+            emissive="#ff8800"
+            emissiveIntensity={1}
+            roughness={0.5}
+            metalness={0.3}
+          />
+        </Sphere>
+        <pointLight position={[0, 0, 0]} intensity={2} distance={50} color="#ffd700" />
+        
+        <OrbitControls
+          enablePan={true}
+          enableZoom={true}
+          enableRotate={true}
+          minDistance={5}
+          maxDistance={30}
+          autoRotate
+          autoRotateSpeed={0.5}
+        />
+      </>
+    )
+  }
 
   return (
     <>
@@ -186,13 +234,37 @@ function Scene({ realms, onRealmClick, theme }: Omit<UniverseMapProps, 'theme'> 
 
 export function UniverseMap({ realms, theme, onRealmClick }: UniverseMapProps) {
   const [isReady, setIsReady] = useState(false)
+  const [hasError, setHasError] = useState(false)
+  const canvasKey = useMemo(() => `canvas-${realms.length}-${Date.now()}`, [realms.length])
 
   useEffect(() => {
-    setIsReady(true)
+    setHasError(false)
+    const timer = setTimeout(() => setIsReady(true), 100)
     return () => {
+      clearTimeout(timer)
       setIsReady(false)
     }
   }, [])
+
+  if (hasError) {
+    return (
+      <div className="w-full h-full relative flex items-center justify-center">
+        <div className="glass-panel p-8 text-center space-y-4">
+          <p className="text-muted-foreground">Unable to load 3D universe</p>
+          <button 
+            onClick={() => {
+              setHasError(false)
+              setIsReady(false)
+              setTimeout(() => setIsReady(true), 100)
+            }}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   if (!isReady) {
     return (
@@ -205,10 +277,19 @@ export function UniverseMap({ realms, theme, onRealmClick }: UniverseMapProps) {
   return (
     <div className="w-full h-full relative">
       <Canvas
+        key={canvasKey}
         camera={{ position: [0, 8, 15], fov: 60 }}
-        gl={{ antialias: true, alpha: true }}
+        gl={{ 
+          antialias: true, 
+          alpha: true,
+          powerPreference: 'high-performance',
+          preserveDrawingBuffer: false
+        }}
         frameloop="always"
         dpr={[1, 2]}
+        onCreated={(state) => {
+          state.gl.setClearColor(0x000000, 0)
+        }}
       >
         <Scene realms={realms} onRealmClick={onRealmClick} theme={theme} />
       </Canvas>

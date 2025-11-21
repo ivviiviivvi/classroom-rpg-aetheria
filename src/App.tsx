@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { ErrorBoundary } from 'react-error-boundary'
+import { ErrorFallback } from '@/components/ErrorFallback'
 import { useTheme, useRole } from '@/hooks/use-theme'
 import { HUDSidebar } from '@/components/HUDSidebar'
 import { UniverseMap } from '@/components/UniverseMap'
@@ -361,7 +362,7 @@ function App() {
       <ParticleField count={40} speed={0.2} />
       
       {(currentView === 'realm-detail' || currentView === 'constellation') && selectedRealm && (
-        <ErrorBoundary fallback={<></>}>
+        <ErrorBoundary fallback={<div />} FallbackComponent={undefined}>
           <ThemeBackground3D theme={currentTheme} realmColor={selectedRealm.color} />
         </ErrorBoundary>
       )}
@@ -433,14 +434,8 @@ function App() {
               className="h-full relative"
             >
             <ErrorBoundary
-              fallback={
-                <div className="h-full flex items-center justify-center">
-                  <div className="glass-panel p-8 text-center space-y-4">
-                    <p className="text-muted-foreground">Unable to load 3D universe map</p>
-                    <Button onClick={() => window.location.reload()}>Reload</Button>
-                  </div>
-                </div>
-              }
+              FallbackComponent={ErrorFallback}
+              onReset={() => window.location.reload()}
             >
               <UniverseMap
                 realms={realms || []}
