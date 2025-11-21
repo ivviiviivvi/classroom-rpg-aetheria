@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { useTheme, useRole } from '@/hooks/use-theme'
 import { HUDSidebar } from '@/components/HUDSidebar'
-import { RealmMap } from '@/components/RealmMap'
+import { UniverseMap } from '@/components/UniverseMap'
+import { BoardGameMap } from '@/components/BoardGameMap'
 import { RealmEditor } from '@/components/RealmEditor'
 import { RealmCreator } from '@/components/RealmCreator'
 import { QuestCreator } from '@/components/QuestCreator'
@@ -20,7 +21,7 @@ import { QuickStats } from '@/components/QuickStats'
 import { GenerativeMusic } from '@/components/GenerativeMusic'
 import { ThemeBackground3D } from '@/components/ThemeBackground3D'
 import { Button } from '@/components/ui/button'
-import { Plus, Target, Pencil, Sparkle } from '@phosphor-icons/react'
+import { Plus, Sparkle } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
@@ -414,7 +415,7 @@ function App() {
               transition={{ duration: 0.3 }}
               className="h-full relative"
             >
-            <RealmMap
+            <UniverseMap
               realms={realms || []}
               theme={currentTheme}
               onRealmClick={handleRealmClick}
@@ -423,19 +424,6 @@ function App() {
               <h1 className="text-5xl font-bold glow-text">Aetheria</h1>
               <p className="text-lg text-muted-foreground">The Living Classroom</p>
             </div>
-            {currentRole === 'teacher' && (realms?.length ?? 0) > 0 && (
-              <div className="absolute top-8 right-8">
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="gap-2 glass-button"
-                  onClick={() => setIsEditingRealms(true)}
-                >
-                  <Pencil size={20} weight="bold" />
-                  Edit Positions
-                </Button>
-              </div>
-            )}
             {(realms?.length === 0 || !realms) && currentRole === 'teacher' && (
               <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
                 <Button size="lg" className="gap-2" onClick={() => setIsCreatingRealm(true)}>
@@ -462,50 +450,18 @@ function App() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
               transition={{ duration: 0.3 }}
-              className="p-8 space-y-6"
+              className="h-full"
             >
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                <h1 className="text-4xl font-bold mb-2">{selectedRealm.name}</h1>
-                <p className="text-lg text-muted-foreground">{selectedRealm.description}</p>
-              </motion.div>
-
-            <div className="flex items-center gap-4">
-              <Button onClick={() => setCurrentView('constellation')} variant="outline" className="gap-2">
-                <Target size={20} />
-                View Constellation
-              </Button>
-              {currentRole === 'teacher' && (
-                <Button onClick={() => setIsCreatingQuest(true)} className="gap-2">
-                  <Plus size={20} weight="bold" />
-                  Create {themeConfig.questLabel}
-                </Button>
-              )}
-            </div>
-
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold">{themeConfig.questLabel}s</h2>
-              {realmQuests.length === 0 ? (
-                <div className="glass-panel p-12 text-center">
-                  <p className="text-muted-foreground">No quests available yet</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {realmQuests.map((quest) => (
-                    <QuestCard
-                      key={quest.id}
-                      quest={quest}
-                      theme={currentTheme}
-                      onClick={() => handleQuestClick(quest.id)}
-                      isLocked={quest.status === 'locked'}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+              <BoardGameMap
+                quests={realmQuests}
+                theme={currentTheme}
+                onQuestClick={handleQuestClick}
+                onBack={() => setCurrentView('world-map')}
+                realmColor={selectedRealm.color}
+                realmName={selectedRealm.name}
+                role={currentRole}
+                onCreateQuest={() => setIsCreatingQuest(true)}
+              />
             </motion.div>
           )}
 

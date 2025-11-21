@@ -77,7 +77,9 @@ export function ThemeBackground3D({ theme, realmColor }: ThemeBackground3DProps)
         positions[i * 3 + 1] = (Math.random() - 0.5) * 20
         positions[i * 3 + 2] = (Math.random() - 0.5) * 20
 
-        const color = new THREE.Color().setHSL(mainColor.getHSL({}).h, 0.8, 0.5 + Math.random() * 0.3)
+        const hsl = { h: 0, s: 0, l: 0 }
+        mainColor.getHSL(hsl)
+        const color = new THREE.Color().setHSL(hsl.h, 0.8, 0.5 + Math.random() * 0.3)
         colors[i * 3] = color.r
         colors[i * 3 + 1] = color.g
         colors[i * 3 + 2] = color.b
