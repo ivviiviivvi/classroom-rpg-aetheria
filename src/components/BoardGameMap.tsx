@@ -1,9 +1,11 @@
-import { useRef, useState, useMemo } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { useRef, useState, useMemo, useEffect } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls, Sphere, Cylinder, Text, Plane, Line } from '@react-three/drei'
 import * as THREE from 'three'
 import { Quest, Theme } from '@/lib/types'
 import { motion } from 'framer-motion'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { MobileControlsHint } from './MobileControlsHint'
 
 interface BoardGameMapProps {
   quests: Quest[]
@@ -185,7 +187,62 @@ function GroundPlane({ color }: { color: string }) {
   )
 }
 
-function Scene({ quests, onQuestClick, color }: { quests: Quest[]; onQuestClick: (id: string) => void; color: string }) {
+interface CameraControllerProps {
+  onControlsReady?: (controls: any) => void
+}
+
+function CameraController({ onControlsReady }: CameraControllerProps) {
+  const { camera } = useThree()
+  const controlsRef = useRef<any>(null)
+
+  useEffect(() => {
+    if (controlsRef.current && onControlsReady) {
+      onControlsReady(controlsRef.current)
+    }
+  }, [onControlsReady])
+
+  useEffect(() => {
+    return () => {
+      if (controlsRef.current) {
+        controlsRef.current.dispose()
+      }
+    }
+  }, [])
+
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      enablePan={true}
+      enableZoom={true}
+      enableRotate={true}
+      minDistance={3}
+      maxDistance={20}
+      maxPolarAngle={Math.PI / 2}
+      touches={{
+        ONE: THREE.TOUCH.ROTATE,
+        TWO: THREE.TOUCH.DOLLY_PAN
+      }}
+      mouseButtons={{
+        LEFT: THREE.MOUSE.ROTATE,
+        MIDDLE: THREE.MOUSE.DOLLY,
+        RIGHT: THREE.MOUSE.PAN
+      }}
+      enableDamping={true}
+      dampingFactor={0.05}
+      rotateSpeed={0.5}
+      zoomSpeed={1.2}
+    />
+  )
+}
+
+interface SceneProps {
+  quests: Quest[]
+  onQuestClick: (id: string) => void
+  color: string
+  onControlsReady?: (controls: any) => void
+}
+
+function Scene({ quests, onQuestClick, color, onControlsReady }: SceneProps) {
   const positions = useMemo(() => {
     return quests.map((_, index) => {
       const progress = index / Math.max(quests.length - 1, 1)
@@ -235,19 +292,41 @@ function Scene({ quests, onQuestClick, color }: { quests: Quest[]; onQuestClick:
         />
       ))}
 
-      <OrbitControls
-        enablePan={true}
-        enableZoom={true}
-        enableRotate={true}
-        minDistance={3}
-        maxDistance={20}
-        maxPolarAngle={Math.PI / 2}
-      />
+      <CameraController onControlsReady={onControlsReady} />
     </>
   )
 }
 
 export function BoardGameMap({ quests, theme, onQuestClick, onBack, realmColor, realmName, role, onCreateQuest }: BoardGameMapProps) {
+  const isMobile = useIsMobile()
+  const controlsRef = useRef<any>(null)
+
+  const handleZoomIn = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object
+      const direction = new THREE.Vector3()
+      camera.getWorldDirection(direction)
+      camera.position.addScaledVector(direction, 1.5)
+      controlsRef.current.update()
+    }
+  }
+
+  const handleZoomOut = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object
+      const direction = new THREE.Vector3()
+      camera.getWorldDirection(direction)
+      camera.position.addScaledVector(direction, -1.5)
+      controlsRef.current.update()
+    }
+  }
+
+  const handleResetView = () => {
+    if (controlsRef.current) {
+      controlsRef.current.reset()
+    }
+  }
+  
   return (
     <div className="w-full h-full relative">
       <Canvas
@@ -256,7 +335,14 @@ export function BoardGameMap({ quests, theme, onQuestClick, onBack, realmColor, 
         frameloop="always"
         dpr={[1, 2]}
       >
-        <Scene quests={quests} onQuestClick={onQuestClick} color={realmColor} />
+        <Scene 
+          quests={quests} 
+          onQuestClick={onQuestClick} 
+          color={realmColor}
+          onControlsReady={(controls) => {
+            controlsRef.current = controls
+          }}
+        />
       </Canvas>
 
       <motion.div
@@ -287,11 +373,20 @@ export function BoardGameMap({ quests, theme, onQuestClick, onBack, realmColor, 
         )}
       </motion.div>
 
-      <div className="absolute bottom-8 right-8 glass-panel px-4 py-2 text-xs text-muted-foreground pointer-events-none">
+      <div className="absolute bottom-8 right-8 glass-panel px-4 py-2 text-xs text-muted-foreground pointer-events-none hidden md:block">
         Drag to rotate • Scroll to zoom • Click nodes to start quest
       </div>
 
-      <div className="absolute bottom-8 left-8 glass-panel px-4 py-3 space-y-2">
+      {isMobile && (
+        <MobileControlsHint
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onResetView={handleResetView}
+          showZoomButtons={true}
+        />
+      )}
+
+      <div className="absolute bottom-8 left-8 glass-panel px-4 py-3 space-y-2 hidden md:block">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-muted" />
           <span className="text-xs">Available</span>

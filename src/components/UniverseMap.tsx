@@ -1,9 +1,12 @@
 import { useRef, useEffect, useState, useMemo } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls, Stars, Text, Line } from '@react-three/drei'
 import * as THREE from 'three'
 import { Realm, Theme } from '@/lib/types'
 import { SafeCanvasWrapper } from './SafeCanvas'
+import { use3DTouchControls } from '@/hooks/use-3d-touch-controls'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { MobileControlsHint } from './MobileControlsHint'
 
 interface UniverseMapProps {
   realms: Realm[]
@@ -153,7 +156,61 @@ function OrbitRing({ radius, color, segments = 128 }: { radius: number; color: s
   )
 }
 
-function Scene({ realms, onRealmClick, theme }: Omit<UniverseMapProps, 'theme'> & { theme: Theme }) {
+interface CameraControllerProps {
+  onControlsReady?: (controls: any) => void
+}
+
+function CameraController({ onControlsReady }: CameraControllerProps) {
+  const { camera } = useThree()
+  const controlsRef = useRef<any>(null)
+
+  useEffect(() => {
+    if (controlsRef.current && onControlsReady) {
+      onControlsReady(controlsRef.current)
+    }
+  }, [onControlsReady])
+
+  useEffect(() => {
+    return () => {
+      if (controlsRef.current) {
+        controlsRef.current.dispose()
+      }
+    }
+  }, [])
+
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      enablePan={true}
+      enableZoom={true}
+      enableRotate={true}
+      minDistance={5}
+      maxDistance={30}
+      autoRotate
+      autoRotateSpeed={0.5}
+      touches={{
+        ONE: THREE.TOUCH.ROTATE,
+        TWO: THREE.TOUCH.DOLLY_PAN
+      }}
+      mouseButtons={{
+        LEFT: THREE.MOUSE.ROTATE,
+        MIDDLE: THREE.MOUSE.DOLLY,
+        RIGHT: THREE.MOUSE.PAN
+      }}
+      enableDamping={true}
+      dampingFactor={0.05}
+      rotateSpeed={0.5}
+      zoomSpeed={1.2}
+    />
+  )
+}
+
+interface SceneProps extends Omit<UniverseMapProps, 'theme'> {
+  theme: Theme
+  onControlsReady?: (controls: any) => void
+}
+
+function Scene({ realms, onRealmClick, theme, onControlsReady }: SceneProps) {
   const isMountedRef = useRef(true)
   
   useEffect(() => {
@@ -246,15 +303,7 @@ function Scene({ realms, onRealmClick, theme }: Omit<UniverseMapProps, 'theme'> 
         />
       ))}
 
-      <OrbitControls
-        enablePan={true}
-        enableZoom={true}
-        enableRotate={true}
-        minDistance={5}
-        maxDistance={30}
-        autoRotate
-        autoRotateSpeed={0.5}
-      />
+      <CameraController onControlsReady={onControlsReady} />
     </>
   )
 }
@@ -264,6 +313,37 @@ export function UniverseMap({ realms, theme, onRealmClick }: UniverseMapProps) {
   const [hasError, setHasError] = useState(false)
   const mountedRef = useRef(true)
   const canvasKey = useRef(`canvas-${Date.now()}`)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const controlsRef = useRef<any>(null)
+  const isMobile = useIsMobile()
+
+  const handleZoomIn = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object
+      const target = controlsRef.current.target
+      const direction = new THREE.Vector3()
+      camera.getWorldDirection(direction)
+      camera.position.addScaledVector(direction, 2)
+      controlsRef.current.update()
+    }
+  }
+
+  const handleZoomOut = () => {
+    if (controlsRef.current) {
+      const camera = controlsRef.current.object
+      const target = controlsRef.current.target
+      const direction = new THREE.Vector3()
+      camera.getWorldDirection(direction)
+      camera.position.addScaledVector(direction, -2)
+      controlsRef.current.update()
+    }
+  }
+
+  const handleResetView = () => {
+    if (controlsRef.current) {
+      controlsRef.current.reset()
+    }
+  }
 
   useEffect(() => {
     mountedRef.current = true
@@ -319,7 +399,7 @@ export function UniverseMap({ realms, theme, onRealmClick }: UniverseMapProps) {
 
   return (
     <SafeCanvasWrapper>
-      <div className="w-full h-full relative">
+      <div ref={containerRef} className="w-full h-full relative">
         <Canvas
           key={canvasKey.current}
           camera={{ position: [0, 8, 15], fov: 60 }}
@@ -345,12 +425,28 @@ export function UniverseMap({ realms, theme, onRealmClick }: UniverseMapProps) {
             setHasError(true)
           }}
         >
-          <Scene realms={realms} onRealmClick={onRealmClick} theme={theme} />
+          <Scene 
+            realms={realms} 
+            onRealmClick={onRealmClick} 
+            theme={theme}
+            onControlsReady={(controls) => {
+              controlsRef.current = controls
+            }}
+          />
         </Canvas>
         
-        <div className="absolute bottom-8 right-8 glass-panel px-4 py-2 text-xs text-muted-foreground pointer-events-none">
+        <div className="absolute bottom-8 right-8 glass-panel px-4 py-2 text-xs text-muted-foreground pointer-events-none hidden md:block">
           Drag to rotate • Scroll to zoom • Click planets to explore
         </div>
+
+        {isMobile && (
+          <MobileControlsHint
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            onResetView={handleResetView}
+            showZoomButtons={true}
+          />
+        )}
       </div>
     </SafeCanvasWrapper>
   )
