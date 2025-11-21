@@ -54,6 +54,13 @@ Aetheria transforms traditional Learning Management Systems into an immersive, g
 - **Progression**: Click toggle → Confirm switch (if needed) → UI re-renders → Teacher view shows "Create Quest" buttons and edit controls → Student view shows "Accept Quest" and submission interface → Profile updates to reflect role
 - **Success Criteria**: Toggle completes in <300ms; role persists in session; appropriate features show/hide based on role
 
+### Feature 7: Realm Position Editor (3D Layout Customization)
+- **Functionality**: Provides an interactive interface for teachers to manually adjust the 3D position of realm nodes on the World Map through drag-and-drop or precise coordinate input
+- **Purpose**: Enables teachers to create meaningful spatial arrangements (e.g., grouping related courses, creating visual hierarchies, or arranging nodes into recognizable patterns)
+- **Trigger**: Teacher clicks "Edit Positions" button visible in World Map view when realms exist
+- **Progression**: Click "Edit Positions" → Full-screen editor opens → 3D scene displays with grid and axes → Teacher drags realm nodes or enters X/Y/Z coordinates → Visual feedback shows selected realm → Click "Save Changes" → Positions persist to storage → Editor closes → World Map reflects new positions
+- **Success Criteria**: Drag operations feel smooth (60fps); coordinate inputs update mesh in real-time; grid/axes provide spatial reference; "Reset Layout" returns to default circular arrangement; changes persist across sessions
+
 ## Edge Case Handling
 
 - **Empty States**: New users see a tutorial Realm with sample Quest; empty inventories show "No artifacts yet" with encouraging message; empty Archives show placeholder for first Knowledge Crystal

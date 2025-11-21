@@ -3,13 +3,14 @@ import { useKV } from '@github/spark/hooks'
 import { useTheme, useRole } from '@/hooks/use-theme'
 import { HUDSidebar } from '@/components/HUDSidebar'
 import { RealmMap } from '@/components/RealmMap'
+import { RealmEditor } from '@/components/RealmEditor'
 import { QuestCard } from '@/components/QuestCard'
 import { QuestDialog } from '@/components/QuestDialog'
 import { ConstellationView } from '@/components/ConstellationView'
 import { CharacterSheet } from '@/components/CharacterSheet'
 import { ArchivesView } from '@/components/ArchivesView'
 import { Button } from '@/components/ui/button'
-import { Plus, Target } from '@phosphor-icons/react'
+import { Plus, Target, Pencil } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { toast } from 'sonner'
 import type { 
@@ -44,6 +45,7 @@ function App() {
   const [currentView, setCurrentView] = useState('world-map')
   const [selectedRealmId, setSelectedRealmId] = useState<string | null>(null)
   const [selectedQuestId, setSelectedQuestId] = useState<string | null>(null)
+  const [isEditingRealms, setIsEditingRealms] = useState(false)
   
   const [realms, setRealms] = useKV<Realm[]>('aetheria-realms', [])
   const [quests, setQuests] = useKV<Quest[]>('aetheria-quests', [])
@@ -229,6 +231,10 @@ function App() {
     })
   }
 
+  const handleUpdateRealms = (updatedRealms: Realm[]) => {
+    setRealms(updatedRealms)
+  }
+
   const selectedRealm = realms?.find(r => r.id === selectedRealmId)
   const realmQuests = quests?.filter(q => q.realmId === selectedRealmId) || []
   const selectedQuest = quests?.find(q => q.id === selectedQuestId) || null
@@ -257,6 +263,19 @@ function App() {
               <h1 className="text-5xl font-bold glow-text">Aetheria</h1>
               <p className="text-lg text-muted-foreground">The Living Classroom</p>
             </div>
+            {currentRole === 'teacher' && (realms?.length ?? 0) > 0 && (
+              <div className="absolute top-8 right-8">
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="gap-2 glass-button"
+                  onClick={() => setIsEditingRealms(true)}
+                >
+                  <Pencil size={20} weight="bold" />
+                  Edit Positions
+                </Button>
+              </div>
+            )}
             {(realms?.length === 0 || !realms) && currentRole === 'teacher' && (
               <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
                 <Button size="lg" className="gap-2">
@@ -366,6 +385,15 @@ function App() {
         onClose={() => setSelectedQuestId(null)}
         onSubmit={handleQuestSubmit}
       />
+
+      {isEditingRealms && (
+        <RealmEditor
+          realms={realms || []}
+          theme={currentTheme}
+          onUpdateRealms={handleUpdateRealms}
+          onClose={() => setIsEditingRealms(false)}
+        />
+      )}
 
       <Toaster position="top-right" />
     </div>
