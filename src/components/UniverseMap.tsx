@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, useMemo } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, Sphere, Stars, Text, Line } from '@react-three/drei'
+import { OrbitControls, Stars, Text, Line } from '@react-three/drei'
 import * as THREE from 'three'
 import { Realm, Theme } from '@/lib/types'
 import { SafeCanvasWrapper } from './SafeCanvas'
@@ -28,43 +28,45 @@ function Planet({ realm, position, onClick, theme }: PlanetProps) {
     isMountedRef.current = true
     return () => {
       isMountedRef.current = false
+      setHovered(false)
     }
   }, [])
 
   useFrame((state) => {
-    if (!isMountedRef.current || !meshRef.current || !groupRef.current) return
+    if (!isMountedRef.current) return
     
     try {
-      meshRef.current.rotation.y += 0.002
-      
-      if (hovered) {
-        meshRef.current.scale.lerp(new THREE.Vector3(1.2, 1.2, 1.2), 0.1)
-      } else {
-        meshRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1)
+      if (meshRef.current) {
+        meshRef.current.rotation.y += 0.002
+        
+        const targetScale = hovered ? 1.2 : 1
+        meshRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1)
       }
       
-      const time = state.clock.getElapsedTime()
-      groupRef.current.position.y = position[1] + Math.sin(time + position[0]) * 0.1
+      if (groupRef.current) {
+        const time = state.clock.getElapsedTime()
+        groupRef.current.position.y = position[1] + Math.sin(time + position[0]) * 0.1
+      }
     } catch (error) {
       return
     }
   })
 
   const handleClick = (e: any) => {
-    e.stopPropagation()
+    if (e) e.stopPropagation()
     if (!isMountedRef.current) return
     onClick()
   }
 
   const handlePointerOver = (e: any) => {
-    e.stopPropagation()
+    if (e) e.stopPropagation()
     if (isMountedRef.current) {
       setHovered(true)
     }
   }
 
   const handlePointerOut = (e: any) => {
-    e.stopPropagation()
+    if (e) e.stopPropagation()
     if (isMountedRef.current) {
       setHovered(false)
     }
@@ -80,13 +82,13 @@ function Planet({ realm, position, onClick, theme }: PlanetProps) {
 
   return (
     <group ref={groupRef} position={position}>
-      <Sphere
+      <mesh
         ref={meshRef}
-        args={[1, 32, 32]}
         onClick={handleClick}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
       >
+        <sphereGeometry args={[1, 32, 32]} />
         <meshStandardMaterial
           color={color}
           roughness={0.7}
@@ -94,17 +96,18 @@ function Planet({ realm, position, onClick, theme }: PlanetProps) {
           emissive={color}
           emissiveIntensity={hovered ? 0.4 : 0.2}
         />
-      </Sphere>
+      </mesh>
 
       {hovered && (
-        <Sphere args={[1.15, 32, 32]}>
+        <mesh>
+          <sphereGeometry args={[1.15, 32, 32]} />
           <meshBasicMaterial
             color={color}
             transparent
             opacity={0.2}
             side={THREE.BackSide}
           />
-        </Sphere>
+        </mesh>
       )}
 
       <pointLight
@@ -172,10 +175,6 @@ function Scene({ realms, onRealmClick, theme }: Omit<UniverseMapProps, 'theme'> 
     })
   , [realms])
 
-  if (!isMountedRef.current) {
-    return null
-  }
-
   if (realms.length === 0) {
     return (
       <>
@@ -183,7 +182,8 @@ function Scene({ realms, onRealmClick, theme }: Omit<UniverseMapProps, 'theme'> 
         <pointLight position={[10, 10, 10]} intensity={1} />
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
         
-        <Sphere args={[0.5, 32, 32]} position={[0, 0, 0]}>
+        <mesh position={[0, 0, 0]}>
+          <sphereGeometry args={[0.5, 32, 32]} />
           <meshStandardMaterial
             color="#ffd700"
             emissive="#ff8800"
@@ -191,7 +191,7 @@ function Scene({ realms, onRealmClick, theme }: Omit<UniverseMapProps, 'theme'> 
             roughness={0.5}
             metalness={0.3}
           />
-        </Sphere>
+        </mesh>
         <pointLight position={[0, 0, 0]} intensity={2} distance={50} color="#ffd700" />
         
         <OrbitControls
@@ -213,7 +213,8 @@ function Scene({ realms, onRealmClick, theme }: Omit<UniverseMapProps, 'theme'> 
       <pointLight position={[10, 10, 10]} intensity={1} />
       <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
 
-      <Sphere args={[0.5, 32, 32]} position={[0, 0, 0]}>
+      <mesh position={[0, 0, 0]}>
+        <sphereGeometry args={[0.5, 32, 32]} />
         <meshStandardMaterial
           color="#ffd700"
           emissive="#ff8800"
@@ -221,7 +222,7 @@ function Scene({ realms, onRealmClick, theme }: Omit<UniverseMapProps, 'theme'> 
           roughness={0.5}
           metalness={0.3}
         />
-      </Sphere>
+      </mesh>
       <pointLight position={[0, 0, 0]} intensity={2} distance={50} color="#ffd700" />
 
       {realms.map((realm, index) => {
@@ -338,6 +339,10 @@ export function UniverseMap({ realms, theme, onRealmClick }: UniverseMapProps) {
             } catch (error) {
               console.error('Error setting up Canvas:', error)
             }
+          }}
+          onError={(error) => {
+            console.error('Canvas error:', error)
+            setHasError(true)
           }}
         >
           <Scene realms={realms} onRealmClick={onRealmClick} theme={theme} />
