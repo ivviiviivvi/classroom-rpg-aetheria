@@ -10,6 +10,7 @@ import { calculateLevel, getLevelTitle, getXpForNextLevel } from '@/lib/game-uti
 import { motion } from 'framer-motion'
 import { AvatarDisplay } from '@/components/AvatarDisplay'
 import { DEFAULT_AVATAR } from '@/lib/avatar-options'
+import { SoundSettings } from '@/components/SoundSettings'
 
 interface HUDSidebarProps {
   profile: UserProfile
@@ -205,22 +206,27 @@ export function HUDSidebar({
       <Separator className="bg-border" />
 
       <div className="space-y-2">
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-          <Button
-            variant="outline"
-            className="w-full justify-start gap-3"
-            onClick={onRoleToggle}
-          >
-            <RoleIcon size={20} />
-            <div className="flex flex-col items-start">
-              <span className="text-xs text-muted-foreground">Playing as</span>
-              <span className="font-medium">
-                {role === 'teacher' ? themeConfig.teacherTitle : themeConfig.studentTitle}
-              </span>
-            </div>
-            <ArrowsClockwise size={16} className="ml-auto" />
-          </Button>
-        </motion.div>
+        <div className="flex items-center gap-2">
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="flex-1">
+            <Button
+              variant="outline"
+              className="w-full justify-start gap-3"
+              onClick={onRoleToggle}
+            >
+              <RoleIcon size={20} />
+              <div className="flex flex-col items-start">
+                <span className="text-xs text-muted-foreground">Playing as</span>
+                <span className="font-medium">
+                  {role === 'teacher' ? themeConfig.teacherTitle : themeConfig.studentTitle}
+                </span>
+              </div>
+              <ArrowsClockwise size={16} className="ml-auto" />
+            </Button>
+          </motion.div>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <SoundSettings />
+          </motion.div>
+        </div>
 
         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
           <Button

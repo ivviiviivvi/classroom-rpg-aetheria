@@ -47,6 +47,7 @@ import {
 } from '@/lib/game-utils'
 import { THEME_CONFIGS } from '@/lib/types'
 import { DEFAULT_AVATAR } from '@/lib/avatar-options'
+import { soundEffects } from '@/lib/sound-effects'
 
 const DEFAULT_PROFILE: UserProfile = {
   id: 'user-1',
@@ -78,6 +79,8 @@ function App() {
   const [crystals, setCrystals] = useKV<KnowledgeCrystal[]>('aetheria-crystals', [])
   const [profile, setProfile] = useKV<UserProfile>('aetheria-profile', DEFAULT_PROFILE)
   const [allProfiles, setAllProfiles] = useKV<UserProfile[]>('aetheria-all-profiles', [])
+  const [soundVolume] = useKV<number>('aetheria-sound-volume', 0.3)
+  const [soundMuted] = useKV<boolean>('aetheria-sound-muted', false)
 
   const currentTheme = theme || 'fantasy'
   const currentRole = role || 'student'
@@ -89,6 +92,11 @@ function App() {
       setShowNameDialog(true)
     }
   }, [profile])
+
+  useEffect(() => {
+    soundEffects.setVolume(soundVolume ?? 0.3)
+    soundEffects.setEnabled(!(soundMuted ?? false))
+  }, [soundVolume, soundMuted])
 
   useEffect(() => {
     if (role && profile) {
@@ -124,6 +132,7 @@ function App() {
   }
 
   const handleRealmClick = (realmId: string) => {
+    soundEffects.play('planet-click')
     setSelectedRealmId(realmId)
     setCurrentView('realm-detail')
   }
@@ -162,6 +171,7 @@ function App() {
       setSubmissions((current) => [...(current || []), submission])
 
       if (evaluation.score >= 70) {
+        soundEffects.play('quest-complete')
         const xpGained = quest.xpValue
         const oldLevel = calculateLevel(currentProfile.xp)
         const newXp = currentProfile.xp + xpGained
@@ -170,6 +180,7 @@ function App() {
         setProfile(updatedProfile)
 
         if (newLevel > oldLevel) {
+          soundEffects.play('level-up')
           setLevelUpData({ level: newLevel, role: currentProfile.role })
           setShowLevelUp(true)
         }
@@ -183,6 +194,7 @@ function App() {
         })
 
         if (evaluation.score >= 90) {
+          soundEffects.play('artifact-drop')
           const artifactName = generateArtifactName(evaluation.score, quest.name, currentTheme)
           const artifact: Artifact = {
             id: generateId(),
@@ -204,6 +216,7 @@ function App() {
           })
         }
       } else {
+        soundEffects.play('quest-fail')
         setQuests((current) =>
           (current || []).map(q => q.id === questId ? { ...q, status: 'failed' as const } : q)
         )
@@ -267,6 +280,7 @@ function App() {
   }
 
   const handleAttuneCrystal = (crystalId: string) => {
+    soundEffects.play('crystal-attune')
     setCrystals((current) =>
       (current || []).map(c => c.id === crystalId ? { ...c, isAttuned: true } : c)
     )
