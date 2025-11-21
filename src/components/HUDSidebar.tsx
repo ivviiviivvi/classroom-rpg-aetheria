@@ -3,7 +3,7 @@ import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { House, User, BookOpen, Target, Sword, Brain, Shield, GraduationCap, ArrowsClockwise, Palette, Trophy, ChalkboardTeacher, Sparkle } from '@phosphor-icons/react'
+import { House, User, BookOpen, Target, Sword, Brain, Shield, GraduationCap, ArrowsClockwise, Palette, Trophy, ChalkboardTeacher, Sparkle, ChartBar } from '@phosphor-icons/react'
 import { Theme, Role, THEME_CONFIGS } from '@/lib/types'
 import { UserProfile } from '@/lib/types'
 import { calculateLevel, getLevelTitle, getXpForNextLevel } from '@/lib/game-utils'
@@ -180,6 +180,23 @@ export function HUDSidebar({
             >
               <ChalkboardTeacher size={20} weight={currentView === 'teacher-dashboard' ? 'fill' : 'regular'} />
               Manage
+            </Button>
+          </motion.div>
+        )}
+        {role === 'teacher' && (
+          <motion.div 
+            whileHover={{ scale: 1.02 }} 
+            whileTap={{ scale: 0.98 }}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+          >
+            <Button
+              variant={currentView === 'analytics' ? 'default' : 'ghost'}
+              className="w-full justify-start gap-3"
+              onClick={() => onNavigate('analytics')}
+            >
+              <ChartBar size={20} weight={currentView === 'analytics' ? 'fill' : 'regular'} />
+              Analytics
             </Button>
           </motion.div>
         )}

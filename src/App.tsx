@@ -13,6 +13,7 @@ import { CharacterSheet } from '@/components/CharacterSheet'
 import { ArchivesView } from '@/components/ArchivesView'
 import { Leaderboard } from '@/components/Leaderboard'
 import { TeacherDashboard } from '@/components/TeacherDashboard'
+import { AnalyticsDashboard } from '@/components/AnalyticsDashboard'
 import { ParticleField } from '@/components/ParticleField'
 import { LevelUpCelebration } from '@/components/LevelUpCelebration'
 import { QuickStats } from '@/components/QuickStats'
@@ -636,6 +637,29 @@ function App() {
                 onDeleteQuest={handleDeleteQuest}
                 onDeleteRealm={handleDeleteRealm}
                 onUpdateSubmission={handleUpdateSubmission}
+                onImportRealms={(newRealms) => {
+                  setRealms((current) => [...(current || []), ...newRealms])
+                }}
+                onImportQuests={(newQuests) => {
+                  setQuests((current) => [...(current || []), ...newQuests])
+                }}
+              />
+            </motion.div>
+          )}
+
+          {currentView === 'analytics' && currentRole === 'teacher' && (
+            <motion.div
+              key="analytics"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <AnalyticsDashboard
+                quests={quests || []}
+                submissions={submissions || []}
+                profiles={allProfiles || []}
+                theme={currentTheme}
               />
             </motion.div>
           )}

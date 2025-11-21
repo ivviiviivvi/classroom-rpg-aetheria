@@ -5,12 +5,13 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Quest, Submission, Realm, Theme, THEME_CONFIGS } from '@/lib/types'
-import { Trash, Eye, CheckCircle, XCircle, CalendarBlank, Notepad, ChartBar } from '@phosphor-icons/react'
+import { Trash, Eye, CheckCircle, XCircle, CalendarBlank, Notepad, ChartBar, Package } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { formatTimeAgo } from '@/lib/game-utils'
 import { RubricManager, type Rubric } from './RubricManager'
 import { CalendarView } from './CalendarView'
 import { GradingInterface } from './GradingInterface'
+import { ExportImportDialog } from './ExportImportDialog'
 import { useKV } from '@github/spark/hooks'
 import { motion } from 'framer-motion'
 
@@ -22,6 +23,8 @@ interface TeacherDashboardProps {
   onDeleteQuest: (questId: string) => void
   onDeleteRealm: (realmId: string) => void
   onUpdateSubmission?: (submission: Submission) => void
+  onImportRealms?: (realms: Realm[]) => void
+  onImportQuests?: (quests: Quest[]) => void
 }
 
 export function TeacherDashboard({ 
@@ -31,10 +34,13 @@ export function TeacherDashboard({
   theme,
   onDeleteQuest,
   onDeleteRealm,
-  onUpdateSubmission
+  onUpdateSubmission,
+  onImportRealms,
+  onImportQuests
 }: TeacherDashboardProps) {
   const [selectedSubmissions, setSelectedSubmissions] = useState<string | null>(null)
   const [gradingSubmission, setGradingSubmission] = useState<Submission | null>(null)
+  const [showExportImport, setShowExportImport] = useState(false)
   const [rubrics, setRubrics] = useKV<Rubric[]>('aetheria-rubrics', [])
   
   const themeConfig = THEME_CONFIGS[theme]
@@ -93,10 +99,35 @@ export function TeacherDashboard({
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
+        className="flex items-center justify-between"
       >
-        <h1 className="text-3xl font-bold mb-2">Teacher Dashboard</h1>
-        <p className="text-muted-foreground">Manage your realms, quests, and student submissions</p>
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Teacher Dashboard</h1>
+          <p className="text-muted-foreground">Manage your realms, quests, and student submissions</p>
+        </div>
+        <Button
+          variant="outline"
+          className="gap-2"
+          onClick={() => setShowExportImport(true)}
+        >
+          <Package size={20} />
+          Export / Import
+        </Button>
       </motion.div>
+
+      <ExportImportDialog
+        open={showExportImport}
+        realms={realms}
+        quests={quests}
+        theme={theme}
+        onClose={() => setShowExportImport(false)}
+        onImportRealms={(newRealms) => {
+          onImportRealms?.(newRealms)
+        }}
+        onImportQuests={(newQuests) => {
+          onImportQuests?.(newQuests)
+        }}
+      />
 
       <Tabs defaultValue="overview" className="space-y-6">
         <TabsList className="glass-panel">
