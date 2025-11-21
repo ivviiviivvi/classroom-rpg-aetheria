@@ -2,11 +2,17 @@ import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Quest, Submission, Realm, Theme, THEME_CONFIGS } from '@/lib/types'
-import { Trash, Eye, CheckCircle, XCircle } from '@phosphor-icons/react'
+import { Trash, Eye, CheckCircle, XCircle, CalendarBlank, Notepad, ChartBar } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { formatTimeAgo } from '@/lib/game-utils'
+import { RubricManager, type Rubric } from './RubricManager'
+import { CalendarView } from './CalendarView'
+import { GradingInterface } from './GradingInterface'
+import { useKV } from '@github/spark/hooks'
+import { motion } from 'framer-motion'
 
 interface TeacherDashboardProps {
   quests: Quest[]
@@ -15,6 +21,7 @@ interface TeacherDashboardProps {
   theme: Theme
   onDeleteQuest: (questId: string) => void
   onDeleteRealm: (realmId: string) => void
+  onUpdateSubmission?: (submission: Submission) => void
 }
 
 export function TeacherDashboard({ 
@@ -23,9 +30,13 @@ export function TeacherDashboard({
   realms, 
   theme,
   onDeleteQuest,
-  onDeleteRealm 
+  onDeleteRealm,
+  onUpdateSubmission
 }: TeacherDashboardProps) {
   const [selectedSubmissions, setSelectedSubmissions] = useState<string | null>(null)
+  const [gradingSubmission, setGradingSubmission] = useState<Submission | null>(null)
+  const [rubrics, setRubrics] = useKV<Rubric[]>('aetheria-rubrics', [])
+  
   const themeConfig = THEME_CONFIGS[theme]
 
   const questSubmissions = submissions.filter(s => s.questId === selectedSubmissions)
@@ -62,143 +73,213 @@ export function TeacherDashboard({
     }
   }
 
+  const handleGrade = (submissionId: string, score: number, feedback: string, rubricScores?: Record<string, number>) => {
+    const original = submissions.find(s => s.id === submissionId)
+    if (!original) return
+    
+    const updatedSubmission: Submission = {
+      ...original,
+      score,
+      feedback,
+      rubricScores,
+      evaluatedAt: Date.now()
+    }
+    onUpdateSubmission?.(updatedSubmission)
+  }
+
   return (
     <div className="space-y-8 p-8 max-w-7xl mx-auto">
-      <div>
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
         <h1 className="text-3xl font-bold mb-2">Teacher Dashboard</h1>
-        <p className="text-muted-foreground">Manage your realms and quests</p>
-      </div>
+        <p className="text-muted-foreground">Manage your realms, quests, and student submissions</p>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="glass-panel p-6">
-          <div className="text-sm text-muted-foreground mb-2">Total Realms</div>
-          <div className="text-4xl font-bold">{realms.length}</div>
-        </Card>
-        <Card className="glass-panel p-6">
-          <div className="text-sm text-muted-foreground mb-2">Total {themeConfig.questLabel}s</div>
-          <div className="text-4xl font-bold">{quests.length}</div>
-        </Card>
-        <Card className="glass-panel p-6">
-          <div className="text-sm text-muted-foreground mb-2">Total Submissions</div>
-          <div className="text-4xl font-bold">{submissions.length}</div>
-        </Card>
-      </div>
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="glass-panel">
+          <TabsTrigger value="overview" className="gap-2">
+            <ChartBar size={18} weight="fill" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="calendar" className="gap-2">
+            <CalendarBlank size={18} weight="fill" />
+            Calendar
+          </TabsTrigger>
+          <TabsTrigger value="rubrics" className="gap-2">
+            <Notepad size={18} weight="fill" />
+            Rubrics
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">Realms</h2>
-        {realms.length === 0 ? (
-          <Card className="glass-panel p-12 text-center">
-            <p className="text-muted-foreground">No realms created yet</p>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {realms.map((realm) => {
-              const realmQuests = quests.filter(q => q.realmId === realm.id)
-              return (
-                <Card key={realm.id} className="glass-panel p-6">
-                  <div className="flex items-start gap-4">
-                    <div 
-                      className="w-12 h-12 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: realm.color }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-lg mb-1">{realm.name}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
-                        {realm.description}
-                      </p>
-                      <Badge variant="outline" className="text-xs">
-                        {realmQuests.length} quests
-                      </Badge>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteRealm(realm.id)}
-                      className="flex-shrink-0"
+        <TabsContent value="overview" className="space-y-8">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          >
+            <Card className="glass-panel p-6 hover:scale-105 transition-transform">
+              <div className="text-sm text-muted-foreground mb-2">Total Realms</div>
+              <div className="text-4xl font-bold text-primary">{realms.length}</div>
+            </Card>
+            <Card className="glass-panel p-6 hover:scale-105 transition-transform">
+              <div className="text-sm text-muted-foreground mb-2">Total {themeConfig.questLabel}s</div>
+              <div className="text-4xl font-bold text-primary">{quests.length}</div>
+            </Card>
+            <Card className="glass-panel p-6 hover:scale-105 transition-transform">
+              <div className="text-sm text-muted-foreground mb-2">Total Submissions</div>
+              <div className="text-4xl font-bold text-primary">{submissions.length}</div>
+            </Card>
+          </motion.div>
+
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold">Realms</h2>
+            {realms.length === 0 ? (
+              <Card className="glass-panel p-12 text-center">
+                <p className="text-muted-foreground">No realms created yet</p>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {realms.map((realm, index) => {
+                  const realmQuests = quests.filter(q => q.realmId === realm.id)
+                  return (
+                    <motion.div
+                      key={realm.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2, delay: index * 0.05 }}
                     >
-                      <Trash size={18} className="text-destructive" />
-                    </Button>
-                  </div>
-                </Card>
-              )
-            })}
-          </div>
-        )}
-      </div>
-
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">{themeConfig.questLabel}s</h2>
-        {quests.length === 0 ? (
-          <Card className="glass-panel p-12 text-center">
-            <p className="text-muted-foreground">No quests created yet</p>
-          </Card>
-        ) : (
-          <div className="space-y-3">
-            {quests.map((quest) => {
-              const stats = getQuestStats(quest.id)
-              const realm = realms.find(r => r.id === quest.realmId)
-              
-              return (
-                <Card key={quest.id} className="glass-panel p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="font-bold text-lg">{quest.name}</h3>
-                        {quest.type === 'boss' && (
-                          <Badge variant="destructive" className="text-xs">Boss</Badge>
-                        )}
-                        {quest.type === 'redemption' && (
-                          <Badge variant="outline" className="text-xs">Redemption</Badge>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        {realm?.name} • {quest.xpValue} {themeConfig.xpLabel}
-                      </p>
-                      <div className="flex items-center gap-4 text-sm">
-                        <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">Submissions:</span>
-                          <span className="font-medium">{stats.total}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <CheckCircle size={16} className="text-accent" />
-                          <span>{stats.completed}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <XCircle size={16} className="text-destructive" />
-                          <span>{stats.failed}</span>
-                        </div>
-                        {stats.total > 0 && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-muted-foreground">Avg:</span>
-                            <span className="font-medium">{stats.avgScore}%</span>
+                      <Card className="glass-panel p-6 hover:scale-105 transition-transform">
+                        <div className="flex items-start gap-4">
+                          <div 
+                            className="w-12 h-12 rounded-full flex-shrink-0 animate-pulse-glow"
+                            style={{ backgroundColor: realm.color }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-lg mb-1">{realm.name}</h3>
+                            <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+                              {realm.description}
+                            </p>
+                            <Badge variant="outline" className="text-xs">
+                              {realmQuests.length} quests
+                            </Badge>
                           </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setSelectedSubmissions(quest.id)}
-                        disabled={stats.total === 0}
-                      >
-                        <Eye size={18} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteQuest(quest.id)}
-                      >
-                        <Trash size={18} className="text-destructive" />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              )
-            })}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteRealm(realm.id)}
+                            className="flex-shrink-0"
+                          >
+                            <Trash size={18} className="text-destructive" />
+                          </Button>
+                        </div>
+                      </Card>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold">{themeConfig.questLabel}s</h2>
+            {quests.length === 0 ? (
+              <Card className="glass-panel p-12 text-center">
+                <p className="text-muted-foreground">No quests created yet</p>
+              </Card>
+            ) : (
+              <div className="space-y-3">
+                {quests.map((quest, index) => {
+                  const stats = getQuestStats(quest.id)
+                  const realm = realms.find(r => r.id === quest.realmId)
+                  return (
+                    <motion.div
+                      key={quest.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.2, delay: index * 0.03 }}
+                    >
+                      <Card className="glass-panel p-6 hover:scale-[1.02] transition-transform">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-bold text-lg">{quest.name}</h3>
+                              {quest.type === 'boss' && (
+                                <Badge variant="destructive" className="text-xs">Boss</Badge>
+                              )}
+                              {quest.type === 'redemption' && (
+                                <Badge variant="outline" className="text-xs">Redemption</Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-3">
+                              {realm?.name} • {quest.xpValue} {themeConfig.xpLabel}
+                            </p>
+                            <div className="flex items-center gap-4 text-sm">
+                              <div className="flex items-center gap-2">
+                                <span className="text-muted-foreground">Submissions:</span>
+                                <span className="font-medium">{stats.total}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle size={16} className="text-accent" weight="fill" />
+                                <span>{stats.completed}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <XCircle size={16} className="text-destructive" weight="fill" />
+                                <span>{stats.failed}</span>
+                              </div>
+                              {stats.total > 0 && (
+                                <div className="flex items-center gap-2">
+                                  <span className="text-muted-foreground">Avg:</span>
+                                  <span className="font-medium">{stats.avgScore}%</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => setSelectedSubmissions(quest.id)}
+                              disabled={stats.total === 0}
+                            >
+                              <Eye size={18} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteQuest(quest.id)}
+                            >
+                              <Trash size={18} className="text-destructive" />
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="calendar">
+          <CalendarView
+            quests={quests}
+            theme={theme}
+            onQuestClick={(questId) => setSelectedSubmissions(questId)}
+          />
+        </TabsContent>
+
+        <TabsContent value="rubrics">
+          <RubricManager
+            rubrics={rubrics || []}
+            onUpdate={(updated) => setRubrics(updated)}
+          />
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={!!selectedSubmissions} onOpenChange={() => setSelectedSubmissions(null)}>
         <DialogContent className="glass-panel max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -213,36 +294,52 @@ export function TeacherDashboard({
                     No submissions yet
                   </div>
                 ) : (
-                  questSubmissions.map((submission) => (
-                    <Card key={submission.id} className="glass-panel p-6">
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <Badge 
-                              variant={(submission.score || 0) >= 70 ? 'default' : 'destructive'}
-                              className="text-lg px-3 py-1"
-                            >
-                              {submission.score}%
-                            </Badge>
-                            <span className="text-sm text-muted-foreground">
-                              {formatTimeAgo(submission.submittedAt)}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <div>
-                            <h4 className="font-semibold text-sm mb-1">Student Response:</h4>
-                            <p className="text-sm text-muted-foreground">{submission.content}</p>
-                          </div>
-                          {submission.feedback && (
-                            <div>
-                              <h4 className="font-semibold text-sm mb-1">Oracle Feedback:</h4>
-                              <p className="text-sm text-muted-foreground">{submission.feedback}</p>
+                  questSubmissions.map((submission, index) => (
+                    <motion.div
+                      key={submission.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                    >
+                      <Card className="glass-panel p-6 hover:scale-[1.02] transition-transform">
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <Badge 
+                                variant={(submission.score || 0) >= 70 ? 'default' : 'destructive'}
+                                className="text-lg px-3 py-1"
+                              >
+                                {submission.score}%
+                              </Badge>
+                              <span className="text-sm text-muted-foreground">
+                                {formatTimeAgo(submission.submittedAt)}
+                              </span>
                             </div>
-                          )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setGradingSubmission(submission)}
+                              className="gap-2"
+                            >
+                              <Eye size={16} />
+                              Re-grade
+                            </Button>
+                          </div>
+                          <div className="space-y-2">
+                            <div>
+                              <h4 className="font-semibold text-sm mb-1">Student Response:</h4>
+                              <p className="text-sm text-muted-foreground">{submission.content}</p>
+                            </div>
+                            {submission.feedback && (
+                              <div>
+                                <h4 className="font-semibold text-sm mb-1">Oracle Feedback:</h4>
+                                <p className="text-sm text-muted-foreground">{submission.feedback}</p>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </Card>
+                      </Card>
+                    </motion.div>
                   ))
                 )}
               </div>
@@ -250,6 +347,18 @@ export function TeacherDashboard({
           )}
         </DialogContent>
       </Dialog>
+
+      {gradingSubmission && selectedQuest && (
+        <GradingInterface
+          submission={gradingSubmission}
+          quest={selectedQuest}
+          rubric={rubrics?.[0]}
+          theme={theme}
+          open={!!gradingSubmission}
+          onClose={() => setGradingSubmission(null)}
+          onGrade={handleGrade}
+        />
+      )}
     </div>
   )
 }

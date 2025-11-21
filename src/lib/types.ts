@@ -94,6 +94,7 @@ export interface Submission {
   feedback?: string
   submittedAt: number
   evaluatedAt?: number
+  rubricScores?: Record<string, number>
 }
 
 export interface KnowledgeCrystal {

@@ -16,6 +16,8 @@ import { TeacherDashboard } from '@/components/TeacherDashboard'
 import { ParticleField } from '@/components/ParticleField'
 import { LevelUpCelebration } from '@/components/LevelUpCelebration'
 import { QuickStats } from '@/components/QuickStats'
+import { GenerativeMusic } from '@/components/GenerativeMusic'
+import { ThemeBackground3D } from '@/components/ThemeBackground3D'
 import { Button } from '@/components/ui/button'
 import { Plus, Target, Pencil, Sparkle } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
@@ -23,6 +25,7 @@ import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { motion, AnimatePresence } from 'framer-motion'
 import type { 
   Realm, 
   Quest, 
@@ -330,22 +333,42 @@ function App() {
   const realmQuests = quests?.filter(q => q.realmId === selectedRealmId) || []
   const selectedQuest = quests?.find(q => q.id === selectedQuestId) || null
 
+  const handleUpdateSubmission = (updatedSubmission: Submission) => {
+    setSubmissions((current) =>
+      (current || []).map(s => s.id === updatedSubmission.id ? updatedSubmission : s)
+    )
+  }
+
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden relative">
       <ParticleField count={40} speed={0.2} />
+      
+      {(currentView === 'realm-detail' || currentView === 'constellation') && selectedRealm && (
+        <ThemeBackground3D theme={currentTheme} realmColor={selectedRealm.color} />
+      )}
       
       <Dialog open={showNameDialog} onOpenChange={() => {}}>
         <DialogContent className="glass-panel" onPointerDownOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
-              <Sparkle size={32} weight="fill" className="text-accent" />
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
+                <Sparkle size={32} weight="fill" className="text-accent" />
+              </motion.div>
               <DialogTitle className="text-2xl">Welcome to Aetheria</DialogTitle>
             </div>
             <DialogDescription className="text-base">
               Enter your hero name to begin your journey through the living classroom
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 mt-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            className="space-y-4 mt-4"
+          >
             <div className="space-y-2">
               <Label htmlFor="hero-name">Your Name</Label>
               <Input
@@ -361,7 +384,7 @@ function App() {
               <Sparkle size={20} weight="fill" />
               Begin Adventure
             </Button>
-          </div>
+          </motion.div>
         </DialogContent>
       </Dialog>
 
@@ -374,10 +397,22 @@ function App() {
         onThemeChange={handleThemeChange}
         onRoleToggle={handleRoleToggle}
       />
+      
+      <div className="fixed bottom-4 left-4 z-50">
+        <GenerativeMusic />
+      </div>
 
       <main className="flex-1 overflow-auto">
-        {currentView === 'world-map' && (
-          <div className="h-full relative">
+        <AnimatePresence mode="wait">
+          {currentView === 'world-map' && (
+            <motion.div
+              key="world-map"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              transition={{ duration: 0.3 }}
+              className="h-full relative"
+            >
             <RealmMap
               realms={realms || []}
               theme={currentTheme}
@@ -416,15 +451,26 @@ function App() {
                 </Button>
               </div>
             )}
-          </div>
-        )}
+            </motion.div>
+          )}
 
-        {currentView === 'realm-detail' && selectedRealm && (
-          <div className="p-8 space-y-6">
-            <div>
-              <h1 className="text-4xl font-bold mb-2">{selectedRealm.name}</h1>
-              <p className="text-lg text-muted-foreground">{selectedRealm.description}</p>
-            </div>
+          {currentView === 'realm-detail' && selectedRealm && (
+            <motion.div
+              key="realm-detail"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.3 }}
+              className="p-8 space-y-6"
+            >
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <h1 className="text-4xl font-bold mb-2">{selectedRealm.name}</h1>
+                <p className="text-lg text-muted-foreground">{selectedRealm.description}</p>
+              </motion.div>
 
             <div className="flex items-center gap-4">
               <Button onClick={() => setCurrentView('constellation')} variant="outline" className="gap-2">
@@ -459,11 +505,18 @@ function App() {
                 </div>
               )}
             </div>
-          </div>
-        )}
+            </motion.div>
+          )}
 
-        {currentView === 'constellation' && selectedRealm && (
-          <div className="h-full flex flex-col">
+          {currentView === 'constellation' && selectedRealm && (
+            <motion.div
+              key="constellation"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="h-full flex flex-col"
+            >
             <div className="p-8 pb-0">
               <Button onClick={() => setCurrentView('realm-detail')} variant="outline" className="mb-4">
                 ← Back to {themeConfig.realmLabel}
@@ -474,11 +527,18 @@ function App() {
             <div className="flex-1">
               <ConstellationView quests={realmQuests} />
             </div>
-          </div>
-        )}
+            </motion.div>
+          )}
 
-        {currentView === 'quests' && (
-          <div className="p-8 space-y-6">
+          {currentView === 'quests' && (
+            <motion.div
+              key="quests"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="p-8 space-y-6"
+            >
             <div>
               <h1 className="text-4xl font-bold mb-2">All {themeConfig.questLabel}s</h1>
               <p className="text-muted-foreground">Your journey across all realms</p>
@@ -509,43 +569,77 @@ function App() {
                 ))}
               </div>
             )}
-          </div>
-        )}
+            </motion.div>
+          )}
 
-        {currentView === 'archives' && (
-          <ArchivesView
-            crystals={crystals || []}
-            theme={currentTheme}
-            onAttune={handleAttuneCrystal}
-          />
-        )}
+          {currentView === 'archives' && (
+            <motion.div
+              key="archives"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ArchivesView
+                crystals={crystals || []}
+                theme={currentTheme}
+                onAttune={handleAttuneCrystal}
+              />
+            </motion.div>
+          )}
 
-        {currentView === 'character' && (
-          <CharacterSheet
-            profile={currentProfile}
-            theme={currentTheme}
-            onUpdateAvatar={handleUpdateAvatar}
-          />
-        )}
+          {currentView === 'character' && (
+            <motion.div
+              key="character"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <CharacterSheet
+                profile={currentProfile}
+                theme={currentTheme}
+                onUpdateAvatar={handleUpdateAvatar}
+              />
+            </motion.div>
+          )}
 
-        {currentView === 'leaderboard' && (
-          <Leaderboard
-            profiles={allProfiles || []}
-            theme={currentTheme}
-            currentUserId={currentProfile.id}
-          />
-        )}
+          {currentView === 'leaderboard' && (
+            <motion.div
+              key="leaderboard"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Leaderboard
+                profiles={allProfiles || []}
+                theme={currentTheme}
+                currentUserId={currentProfile.id}
+              />
+            </motion.div>
+          )}
 
-        {currentView === 'teacher-dashboard' && currentRole === 'teacher' && (
-          <TeacherDashboard
-            quests={quests || []}
-            submissions={submissions || []}
-            realms={realms || []}
-            theme={currentTheme}
-            onDeleteQuest={handleDeleteQuest}
-            onDeleteRealm={handleDeleteRealm}
-          />
-        )}
+          {currentView === 'teacher-dashboard' && currentRole === 'teacher' && (
+            <motion.div
+              key="teacher-dashboard"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <TeacherDashboard
+                quests={quests || []}
+                submissions={submissions || []}
+                realms={realms || []}
+                theme={currentTheme}
+                onDeleteQuest={handleDeleteQuest}
+                onDeleteRealm={handleDeleteRealm}
+                onUpdateSubmission={handleUpdateSubmission}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       <QuestDialog
