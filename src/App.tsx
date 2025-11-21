@@ -31,7 +31,8 @@ import type {
   KnowledgeCrystal, 
   Artifact,
   Theme,
-  Role
+  Role,
+  AvatarCustomization
 } from '@/lib/types'
 import { 
   generateId, 
@@ -40,6 +41,7 @@ import {
   getRarityFromScore 
 } from '@/lib/game-utils'
 import { THEME_CONFIGS } from '@/lib/types'
+import { DEFAULT_AVATAR } from '@/lib/avatar-options'
 
 const DEFAULT_PROFILE: UserProfile = {
   id: 'user-1',
@@ -47,7 +49,8 @@ const DEFAULT_PROFILE: UserProfile = {
   role: 'student',
   xp: 0,
   level: 1,
-  artifacts: []
+  artifacts: [],
+  avatar: DEFAULT_AVATAR
 }
 
 function App() {
@@ -306,11 +309,21 @@ function App() {
     const updatedProfile: UserProfile = { 
       ...currentProfile, 
       name: nameInput.trim(),
-      id: `user-${Date.now()}`
+      id: `user-${Date.now()}`,
+      avatar: currentProfile.avatar || DEFAULT_AVATAR
     }
     setProfile(updatedProfile)
     setShowNameDialog(false)
     toast.success(`Welcome, ${nameInput.trim()}!`)
+  }
+
+  const handleUpdateAvatar = (avatar: AvatarCustomization) => {
+    const updatedProfile: UserProfile = {
+      ...currentProfile,
+      avatar
+    }
+    setProfile(updatedProfile)
+    toast.success('Avatar updated!')
   }
 
   const selectedRealm = realms?.find(r => r.id === selectedRealmId)
@@ -511,6 +524,7 @@ function App() {
           <CharacterSheet
             profile={currentProfile}
             theme={currentTheme}
+            onUpdateAvatar={handleUpdateAvatar}
           />
         )}
 

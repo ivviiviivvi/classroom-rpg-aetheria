@@ -8,6 +8,8 @@ import { Theme, Role, THEME_CONFIGS } from '@/lib/types'
 import { UserProfile } from '@/lib/types'
 import { calculateLevel, getLevelTitle, getXpForNextLevel } from '@/lib/game-utils'
 import { motion } from 'framer-motion'
+import { AvatarDisplay } from '@/components/AvatarDisplay'
+import { DEFAULT_AVATAR } from '@/lib/avatar-options'
 
 interface HUDSidebarProps {
   profile: UserProfile
@@ -55,12 +57,12 @@ export function HUDSidebar({
             whileHover={{ scale: 1.05, rotate: [0, -5, 5, 0] }}
             transition={{ duration: 0.3 }}
           >
-            <Avatar className="w-16 h-16 border-2 border-primary shadow-lg">
-              <AvatarImage src={profile.avatarUrl} />
-              <AvatarFallback className="bg-primary/20 text-primary text-xl font-bold">
-                {profile.name.charAt(0).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <div className="w-16 h-16 border-2 border-primary shadow-lg rounded-full overflow-hidden bg-card">
+              <AvatarDisplay 
+                avatar={profile.avatar || DEFAULT_AVATAR} 
+                size="md"
+              />
+            </div>
           </motion.div>
           <div className="flex-1 min-w-0">
             <h3 className="font-bold text-lg truncate">{profile.name}</h3>

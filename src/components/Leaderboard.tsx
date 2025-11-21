@@ -5,6 +5,8 @@ import { Theme, THEME_CONFIGS, UserProfile } from '@/lib/types'
 import { Trophy, Medal, Star, Crown, Sparkle } from '@phosphor-icons/react'
 import { calculateLevel, getLevelTitle } from '@/lib/game-utils'
 import { motion } from 'framer-motion'
+import { AvatarDisplay } from '@/components/AvatarDisplay'
+import { DEFAULT_AVATAR } from '@/lib/avatar-options'
 
 interface LeaderboardProps {
   profiles: UserProfile[]
@@ -91,11 +93,12 @@ export function Leaderboard({ profiles, theme, currentUserId }: LeaderboardProps
                       whileHover={{ scale: 1.05, rotate: [0, -5, 5, 0] }}
                       transition={{ duration: 0.3 }}
                     >
-                      <Avatar className="w-16 h-16 border-2 border-primary">
-                        <AvatarFallback className="bg-primary/20 text-primary text-xl font-bold">
-                          {profile.name.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
+                      <div className="w-16 h-16 border-2 border-primary rounded-full overflow-hidden bg-card">
+                        <AvatarDisplay 
+                          avatar={profile.avatar || DEFAULT_AVATAR} 
+                          size="md"
+                        />
+                      </div>
                     </motion.div>
 
                     <div className="flex-1 min-w-0">

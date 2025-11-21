@@ -115,10 +115,22 @@ export interface Artifact {
   questId: string
 }
 
+export interface AvatarCustomization {
+  skinTone: string
+  hairStyle: string
+  hairColor: string
+  eyeColor: string
+  bodyType: string
+  outfit: string
+  outfitColor: string
+  accessories: string[]
+}
+
 export interface UserProfile {
   id: string
   name: string
   avatarUrl?: string
+  avatar?: AvatarCustomization
   role: Role
   xp: number
   level: number

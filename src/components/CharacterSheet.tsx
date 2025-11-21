@@ -1,21 +1,35 @@
+import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
+import { Button } from '@/components/ui/button'
 import { UserProfile, Theme, THEME_CONFIGS, Artifact } from '@/lib/types'
 import { calculateLevel, getLevelTitle, getXpForNextLevel } from '@/lib/game-utils'
-import { Sparkle, Star, TrendUp } from '@phosphor-icons/react'
+import { Sparkle, Star, TrendUp, Pencil } from '@phosphor-icons/react'
+import { AvatarDisplay } from '@/components/AvatarDisplay'
+import { AvatarEditor } from '@/components/AvatarEditor'
+import { DEFAULT_AVATAR } from '@/lib/avatar-options'
+import type { AvatarCustomization } from '@/lib/types'
 
 interface CharacterSheetProps {
   profile: UserProfile
   theme: Theme
+  onUpdateAvatar?: (avatar: AvatarCustomization) => void
 }
 
-export function CharacterSheet({ profile, theme }: CharacterSheetProps) {
+export function CharacterSheet({ profile, theme, onUpdateAvatar }: CharacterSheetProps) {
+  const [isEditingAvatar, setIsEditingAvatar] = useState(false)
   const themeConfig = THEME_CONFIGS[theme]
   const level = calculateLevel(profile.xp)
   const levelTitle = getLevelTitle(level, profile.role)
   const nextLevelXp = getXpForNextLevel(profile.xp)
   const xpProgress = ((profile.xp % nextLevelXp) / nextLevelXp) * 100
+
+  const handleSaveAvatar = (avatar: AvatarCustomization) => {
+    if (onUpdateAvatar) {
+      onUpdateAvatar(avatar)
+    }
+  }
 
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
@@ -39,8 +53,23 @@ export function CharacterSheet({ profile, theme }: CharacterSheetProps) {
     <div className="space-y-8 p-8 max-w-6xl mx-auto">
       <div className="glass-panel p-8 space-y-6">
         <div className="flex items-start gap-6">
-          <div className="w-32 h-32 rounded-full border-4 border-accent bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-            <span className="text-6xl font-bold">{profile.name.charAt(0).toUpperCase()}</span>
+          <div className="relative group">
+            <div className="w-32 h-32">
+              <AvatarDisplay 
+                avatar={profile.avatar || DEFAULT_AVATAR} 
+                size="lg"
+                className="border-4 border-accent rounded-full bg-card"
+              />
+            </div>
+            {onUpdateAvatar && (
+              <Button
+                size="sm"
+                className="absolute bottom-0 right-0 rounded-full w-10 h-10 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => setIsEditingAvatar(true)}
+              >
+                <Pencil size={18} weight="bold" />
+              </Button>
+            )}
           </div>
           <div className="flex-1 space-y-4">
             <div>
@@ -110,6 +139,16 @@ export function CharacterSheet({ profile, theme }: CharacterSheetProps) {
           </div>
         )}
       </div>
+
+      {onUpdateAvatar && (
+        <AvatarEditor
+          open={isEditingAvatar}
+          avatar={profile.avatar || DEFAULT_AVATAR}
+          theme={theme}
+          onClose={() => setIsEditingAvatar(false)}
+          onSave={handleSaveAvatar}
+        />
+      )}
     </div>
   )
 }
