@@ -35,7 +35,7 @@ export function QuestDialog({ quest, theme, open, onClose, onSubmit }: QuestDial
       await onSubmit(quest.id, content)
       setContent('')
       toast.success('Submission sent to the ' + themeConfig.oracleLabel)
-    } catch (error) {
+    } catch (_error) {
       toast.error('Submission failed')
     } finally {
       setIsSubmitting(false)

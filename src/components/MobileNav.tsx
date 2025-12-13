@@ -20,7 +20,7 @@ import {
 import { Theme, Role, THEME_CONFIGS } from '@/lib/types'
 import { UserProfile } from '@/lib/types'
 import { calculateLevel, getLevelTitle, getXpForNextLevel } from '@/lib/game-utils'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { AvatarDisplay } from '@/components/AvatarDisplay'
 import { DEFAULT_AVATAR } from '@/lib/avatar-options'
 import { SoundSettings } from '@/components/SoundSettings'

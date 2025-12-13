@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
-import { useTheme } from '@/hooks/use-theme'
-import { Button } from '@/components/ui/button'
-import { SpeakerHigh, SpeakerSlash } from '@phosphor-icons/react'
-import type { Theme } from '@/lib/types'
+import {  useEffect, useRef, useState } from 'react'
+import {  useTheme } from '@/hooks/use-theme'
+import {  Button } from '@/components/ui/button'
+import {  SpeakerHigh, SpeakerSlash } from '@phosphor-icons/react'
 
 const THEME_SCALES = {
   fantasy: {

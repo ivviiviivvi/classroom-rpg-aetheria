@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { SpeakerHigh, SpeakerSlash } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'

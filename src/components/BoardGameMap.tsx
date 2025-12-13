@@ -192,7 +192,7 @@ interface CameraControllerProps {
 }
 
 function CameraController({ onControlsReady }: CameraControllerProps) {
-  const { camera } = useThree()
+  const { camera: _camera } = useThree()
   const controlsRef = useRef<any>(null)
 
   useEffect(() => {
@@ -297,7 +297,7 @@ function Scene({ quests, onQuestClick, color, onControlsReady }: SceneProps) {
   )
 }
 
-export function BoardGameMap({ quests, theme, onQuestClick, onBack, realmColor, realmName, role, onCreateQuest }: BoardGameMapProps) {
+export function BoardGameMap({ quests, onQuestClick, onBack, realmColor, realmName, role, onCreateQuest }: BoardGameMapProps) {
   const isMobile = useIsMobile()
   const controlsRef = useRef<any>(null)
 

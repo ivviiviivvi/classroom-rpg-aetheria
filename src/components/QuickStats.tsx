@@ -13,7 +13,7 @@ interface QuickStatsProps {
 
 export function QuickStats({ totalQuests, completedQuests, failedQuests, totalArtifacts, theme }: QuickStatsProps) {
   const themeConfig = THEME_CONFIGS[theme]
-  const completionRate = totalQuests > 0 ? Math.round((completedQuests / totalQuests) * 100) : 0
+  const _completionRate = totalQuests > 0 ? Math.round((completedQuests / totalQuests) * 100) : 0
 
   const stats = [
     {

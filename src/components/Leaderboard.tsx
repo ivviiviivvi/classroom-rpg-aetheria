@@ -1,6 +1,5 @@
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Theme, THEME_CONFIGS, UserProfile } from '@/lib/types'
 import { Trophy, Medal, Star, Crown, Sparkle } from '@phosphor-icons/react'
 import { calculateLevel, getLevelTitle } from '@/lib/game-utils'

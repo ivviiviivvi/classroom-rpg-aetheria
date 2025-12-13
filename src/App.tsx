@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { ErrorBoundary } from 'react-error-boundary'
-import { ErrorFallback } from '@/components/ErrorFallback'
 import { useTheme, useRole } from '@/hooks/use-theme'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useTouchSwipe } from '@/hooks/use-touch-gestures'

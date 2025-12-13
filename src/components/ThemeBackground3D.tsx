@@ -266,7 +266,7 @@ export function ThemeBackground3D({ theme, realmColor }: ThemeBackground3DProps)
       
       try {
         renderer.forceContextLoss()
-      } catch (e) {
+      } catch (_e) {
       }
       
       if (container && renderer.domElement && renderer.domElement.parentNode === container) {

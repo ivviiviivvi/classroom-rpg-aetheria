@@ -4,7 +4,6 @@ import { OrbitControls, Stars, Text, Line } from '@react-three/drei'
 import * as THREE from 'three'
 import { Realm, Theme } from '@/lib/types'
 import { SafeCanvasWrapper } from './SafeCanvas'
-import { use3DTouchControls } from '@/hooks/use-3d-touch-controls'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { MobileControlsHint } from './MobileControlsHint'
 
@@ -21,7 +20,7 @@ interface PlanetProps {
   theme: Theme
 }
 
-function Planet({ realm, position, onClick, theme }: PlanetProps) {
+function Planet({ realm, position, onClick, theme: _theme }: PlanetProps) {
   const meshRef = useRef<THREE.Mesh>(null)
   const groupRef = useRef<THREE.Group>(null)
   const [hovered, setHovered] = useState(false)
@@ -50,7 +49,7 @@ function Planet({ realm, position, onClick, theme }: PlanetProps) {
         const time = state.clock.getElapsedTime()
         groupRef.current.position.y = position[1] + Math.sin(time + position[0]) * 0.1
       }
-    } catch (error) {
+    } catch (_error) {
       return
     }
   })
@@ -161,7 +160,7 @@ interface CameraControllerProps {
 }
 
 function CameraController({ onControlsReady }: CameraControllerProps) {
-  const { camera } = useThree()
+  const { camera: _camera } = useThree()
   const controlsRef = useRef<any>(null)
 
   useEffect(() => {
@@ -210,7 +209,7 @@ interface SceneProps extends Omit<UniverseMapProps, 'theme'> {
   onControlsReady?: (controls: any) => void
 }
 
-function Scene({ realms, onRealmClick, theme, onControlsReady }: SceneProps) {
+function Scene({ realms, onRealmClick, onControlsReady }: SceneProps) {
   const isMountedRef = useRef(true)
   
   useEffect(() => {
@@ -308,7 +307,7 @@ function Scene({ realms, onRealmClick, theme, onControlsReady }: SceneProps) {
   )
 }
 
-export function UniverseMap({ realms, theme, onRealmClick }: UniverseMapProps) {
+export function UniverseMap({ realms, onRealmClick }: UniverseMapProps) {
   const [isReady, setIsReady] = useState(false)
   const [hasError, setHasError] = useState(false)
   const mountedRef = useRef(true)
@@ -320,7 +319,7 @@ export function UniverseMap({ realms, theme, onRealmClick }: UniverseMapProps) {
   const handleZoomIn = () => {
     if (controlsRef.current) {
       const camera = controlsRef.current.object
-      const target = controlsRef.current.target
+      const _target = controlsRef.current.target
       const direction = new THREE.Vector3()
       camera.getWorldDirection(direction)
       camera.position.addScaledVector(direction, 2)
@@ -331,7 +330,7 @@ export function UniverseMap({ realms, theme, onRealmClick }: UniverseMapProps) {
   const handleZoomOut = () => {
     if (controlsRef.current) {
       const camera = controlsRef.current.object
-      const target = controlsRef.current.target
+      const _target = controlsRef.current.target
       const direction = new THREE.Vector3()
       camera.getWorldDirection(direction)
       camera.position.addScaledVector(direction, -2)
@@ -416,12 +415,12 @@ export function UniverseMap({ realms, theme, onRealmClick }: UniverseMapProps) {
               if (mountedRef.current) {
                 state.gl.setClearColor(0x000000, 0)
               }
-            } catch (error) {
-              console.error('Error setting up Canvas:', error)
+            } catch (_error) {
+              console.error('Error setting up Canvas:', _error)
             }
           }}
-          onError={(error) => {
-            console.error('Canvas error:', error)
+          onError={(_error) => {
+            console.error('Canvas error:', _error)
             setHasError(true)
           }}
         >

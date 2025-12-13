@@ -30,7 +30,7 @@ interface AvatarEditorProps {
   onSave: (avatar: AvatarCustomization) => void
 }
 
-export function AvatarEditor({ open, avatar, theme, onClose, onSave }: AvatarEditorProps) {
+export function AvatarEditor({ open, avatar, theme: _theme, onClose, onSave }: AvatarEditorProps) {
   const [editingAvatar, setEditingAvatar] = useState<AvatarCustomization>(avatar)
 
   const handleSave = () => {

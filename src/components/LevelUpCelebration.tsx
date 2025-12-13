@@ -13,7 +13,7 @@ interface LevelUpCelebrationProps {
 }
 
 export function LevelUpCelebration({ show, level, role, theme, onComplete }: LevelUpCelebrationProps) {
-  const themeConfig = THEME_CONFIGS[theme]
+  const _themeConfig = THEME_CONFIGS[theme]
   const levelTitle = getLevelTitle(level, role)
 
   useEffect(() => {

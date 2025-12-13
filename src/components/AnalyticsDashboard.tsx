@@ -16,7 +16,7 @@ import {
   ChartBar,
   Users,
   CheckCircle,
-  XCircle,
+
   Star,
   Eye
 } from '@phosphor-icons/react'
@@ -55,7 +55,7 @@ export function AnalyticsDashboard({ quests, submissions, profiles, theme }: Ana
   const themeConfig = THEME_CONFIGS[theme]
   const [selectedStudent, setSelectedStudent] = useState<UserProfile | null>(null)
 
-  const questAnalytics = useMemo(() => {
+  const questAnalytics = useMemo<QuestAnalytics[]>(() => {
     return quests.map(quest => {
       const questSubmissions = submissions.filter(s => s.questId === quest.id)
       const scoredSubmissions = questSubmissions.filter(s => s.score !== undefined)
@@ -93,7 +93,7 @@ export function AnalyticsDashboard({ quests, submissions, profiles, theme }: Ana
     })
   }, [quests, submissions])
 
-  const studentAnalytics = useMemo(() => {
+  const studentAnalytics = useMemo<StudentAnalytics[]>(() => {
     return profiles.filter(p => p.role === 'student').map(profile => {
       const studentSubmissions = submissions.filter(s => s.studentId === profile.id)
       const scoredSubmissions = studentSubmissions.filter(s => s.score !== undefined && s.score >= 70)

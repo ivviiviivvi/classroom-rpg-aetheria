@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
+
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Checkbox } from '@/components/ui/checkbox'
 import { 
@@ -99,7 +99,7 @@ export function ExportImportDialog({
       setCopied(true)
       toast.success('Copied to clipboard!')
       setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
+    } catch ( _err) {
       toast.error('Failed to copy to clipboard')
     }
   }
@@ -139,7 +139,7 @@ export function ExportImportDialog({
 
       setImportText('')
       onClose()
-    } catch (err) {
+    } catch ( _err) {
       toast.error('Import failed', {
         description: 'Invalid package format or corrupted data'
       })

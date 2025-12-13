@@ -54,7 +54,7 @@ export function GradingInterface({
       const result = await window.spark.llm(promptText, 'gpt-4o')
       setFeedback(result)
       toast.success('Feedback generated!')
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to generate feedback')
     } finally {
       setIsGenerating(false)

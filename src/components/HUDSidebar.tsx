@@ -1,6 +1,5 @@
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { House, User, BookOpen, Target, Sword, Brain, Shield, GraduationCap, ArrowsClockwise, Palette, Trophy, ChalkboardTeacher, Sparkle, ChartBar } from '@phosphor-icons/react'

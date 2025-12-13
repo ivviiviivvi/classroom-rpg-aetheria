@@ -1,7 +1,6 @@
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Quest, QuestType, THEME_CONFIGS, Theme } from '@/lib/types'
+import { Quest, THEME_CONFIGS, Theme } from '@/lib/types'
 import { Sword, Skull, ArrowBendUpLeft, Lock, CheckCircle, XCircle } from '@phosphor-icons/react'
 import { formatTimeAgo } from '@/lib/game-utils'
 
