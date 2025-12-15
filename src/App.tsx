@@ -25,6 +25,7 @@ import { LevelUpCelebration } from '@/components/LevelUpCelebration'
 import { QuickStats } from '@/components/QuickStats'
 import { GenerativeMusic } from '@/components/GenerativeMusic'
 import { ThemeBackground3D } from '@/components/ThemeBackground3D'
+import { BackToTop } from '@/components/BackToTop'
 import { Button } from '@/components/ui/button'
 import { Plus, Sparkle } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
@@ -472,6 +473,8 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
       <div className="fixed bottom-4 left-4 z-40 md:z-50">
         <GenerativeMusic />
       </div>
+
+      <BackToTop containerRef={mainRef} />
 
       <main ref={mainRef} className="flex-1 overflow-auto pt-[60px] pb-[60px] md:pt-0 md:pb-0">
         <AnimatePresence mode="wait">
