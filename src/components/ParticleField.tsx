@@ -51,34 +51,54 @@ export function ParticleField({ count = 50, speed = 0.3 }: ParticleFieldProps) {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
+    // Optimization: Pre-calculate squared distance to avoid Math.sqrt in the loop
+    const CONNECTION_DISTANCE = 150
+    const CONNECTION_DISTANCE_SQ = CONNECTION_DISTANCE * CONNECTION_DISTANCE
+
     const animate = () => {
       if (!isMounted || !canvas || !ctx) return
 
       ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      particlesRef.current.forEach((particle) => {
+      // Optimization: Use for loop instead of forEach to avoid callback allocation per frame
+      for (let i = 0; i < particlesRef.current.length; i++) {
+        const particle = particlesRef.current[i]
         particle.x += particle.vx
         particle.y += particle.vy
 
+        // Bounce off walls
         if (particle.x < 0 || particle.x > dimensionsRef.current.width) particle.vx *= -1
         if (particle.y < 0 || particle.y > dimensionsRef.current.height) particle.vy *= -1
 
+        // Draw particle
         ctx.beginPath()
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2)
         ctx.fillStyle = `rgba(255, 255, 255, ${particle.opacity})`
         ctx.fill()
-      })
+      }
 
+      // Draw connections
       for (let i = 0; i < particlesRef.current.length; i++) {
         for (let j = i + 1; j < particlesRef.current.length; j++) {
           const p1 = particlesRef.current[i]
           const p2 = particlesRef.current[j]
-          const dx = p1.x - p2.x
-          const dy = p1.y - p2.y
-          const distance = Math.sqrt(dx * dx + dy * dy)
 
-          if (distance < 150) {
-            const opacity = (1 - distance / 150) * 0.15
+          const dx = p1.x - p2.x
+
+          // Optimization: Early exit if horizontal distance is too large
+          if (dx > CONNECTION_DISTANCE || dx < -CONNECTION_DISTANCE) continue
+
+          const dy = p1.y - p2.y
+
+          // Optimization: Early exit if vertical distance is too large
+          if (dy > CONNECTION_DISTANCE || dy < -CONNECTION_DISTANCE) continue
+
+          // Optimization: Compare squared distance to avoid expensive Math.sqrt()
+          const distSq = dx * dx + dy * dy
+
+          if (distSq < CONNECTION_DISTANCE_SQ) {
+            const distance = Math.sqrt(distSq)
+            const opacity = (1 - distance / CONNECTION_DISTANCE) * 0.15
             ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`
             ctx.lineWidth = 0.5
             ctx.beginPath()
