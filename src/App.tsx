@@ -25,6 +25,7 @@ import { LevelUpCelebration } from '@/components/LevelUpCelebration'
 import { QuickStats } from '@/components/QuickStats'
 import { GenerativeMusic } from '@/components/GenerativeMusic'
 import { ThemeBackground3D } from '@/components/ThemeBackground3D'
+import { IngestionZone } from '@/components/IngestionZone'
 import { Button } from '@/components/ui/button'
 import { Plus, Sparkle } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
@@ -372,7 +373,7 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
     )
   }
 
-  const viewOrder = ['world-map', 'quests', 'archives', 'character', 'leaderboard']
+  const viewOrder = ['world-map', 'quests', 'ingestion-zone', 'archives', 'character', 'leaderboard']
   
   useTouchSwipe(mainRef.current, {
     onSwipeLeft: () => {
@@ -610,6 +611,18 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
                 ))}
               </div>
             )}
+            </motion.div>
+          )}
+
+          {currentView === 'ingestion-zone' && (
+            <motion.div
+              key="ingestion-zone"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <IngestionZone theme={currentTheme} />
             </motion.div>
           )}
 

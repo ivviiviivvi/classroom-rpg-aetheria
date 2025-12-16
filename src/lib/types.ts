@@ -8,6 +8,7 @@ export interface ThemeConfig {
   realmLabel: string
   questLabel: string
   archiveLabel: string
+  ingestionLabel: string
   oracleLabel: string
   xpLabel: string
   geometry: 'octahedron' | 'icosahedron' | 'dodecahedron' | 'sphere'
@@ -21,6 +22,7 @@ export const THEME_CONFIGS: Record<Theme, ThemeConfig> = {
     realmLabel: 'Realm',
     questLabel: 'Quest',
     archiveLabel: 'Archives',
+    ingestionLabel: "Alchemist's Lab",
     oracleLabel: 'Oracle',
     xpLabel: 'Glory',
     geometry: 'octahedron'
@@ -32,6 +34,7 @@ export const THEME_CONFIGS: Record<Theme, ThemeConfig> = {
     realmLabel: 'Sector',
     questLabel: 'Mission',
     archiveLabel: 'Database',
+    ingestionLabel: 'Data Uplink',
     oracleLabel: 'AI Core',
     xpLabel: 'Data',
     geometry: 'icosahedron'
@@ -43,6 +46,7 @@ export const THEME_CONFIGS: Record<Theme, ThemeConfig> = {
     realmLabel: 'Domain',
     questLabel: 'Decree',
     archiveLabel: 'Library',
+    ingestionLabel: "Scribe's Desk",
     oracleLabel: 'Council',
     xpLabel: 'Honor',
     geometry: 'dodecahedron'
@@ -54,6 +58,7 @@ export const THEME_CONFIGS: Record<Theme, ThemeConfig> = {
     realmLabel: 'Course',
     questLabel: 'Assignment',
     archiveLabel: 'Resources',
+    ingestionLabel: 'Research Lab',
     oracleLabel: 'Evaluator',
     xpLabel: 'Points',
     geometry: 'sphere'
@@ -145,4 +150,16 @@ export interface ConstellationNode {
   y: number
   status: 'unlit' | 'lit'
   connections: string[]
+}
+
+export type IngestedArtifactType = 'report' | 'chat' | 'prototype'
+
+export interface IngestedArtifact {
+  id: string
+  type: IngestedArtifactType
+  title: string
+  content: string
+  summary?: string
+  tags?: string[]
+  createdAt: number
 }

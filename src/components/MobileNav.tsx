@@ -15,7 +15,8 @@ import {
   List,
   Sparkle,
   ArrowsClockwise,
-  Palette
+  Palette,
+  Flask
 } from '@phosphor-icons/react'
 import { Theme, Role, THEME_CONFIGS } from '@/lib/types'
 import { UserProfile } from '@/lib/types'
@@ -140,6 +141,14 @@ export function MobileNav({
                     >
                       <Target size={20} weight={currentView === 'quests' ? 'fill' : 'regular'} />
                       {themeConfig.questLabel}s
+                    </Button>
+                    <Button
+                      variant={currentView === 'ingestion-zone' ? 'default' : 'ghost'}
+                      className="w-full justify-start gap-3"
+                      onClick={() => handleNavigate('ingestion-zone')}
+                    >
+                      <Flask size={20} weight={currentView === 'ingestion-zone' ? 'fill' : 'regular'} />
+                      {themeConfig.ingestionLabel}
                     </Button>
                     <Button
                       variant={currentView === 'archives' ? 'default' : 'ghost'}
