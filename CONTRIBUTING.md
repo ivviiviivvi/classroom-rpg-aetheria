@@ -117,14 +117,34 @@ Unsure where to begin? Look for issues labeled:
 
 ### File Organization
 
+The repository is organized into clear sections:
+
 ```
-src/
-├── components/     # React components
-├── hooks/          # Custom React hooks
-├── lib/            # Utility functions and helpers
-├── styles/         # Global styles
-└── assets/         # Static assets
+classroom-rpg-aetheria/
+├── src/              # Production source code
+│   ├── components/   # React components
+│   ├── hooks/        # Custom React hooks
+│   ├── lib/          # Utility functions and helpers
+│   ├── styles/       # Global styles
+│   └── assets/       # Static assets
+├── research/         # 🔬 Research, analysis, evaluations
+├── drafts/           # 📝 Work in progress, iterations
+├── satellites/       # 🛰️ Auxiliary tools and utilities
+│   ├── video-production/  # Video generation system
+│   └── portfolio/         # Portfolio videos
+└── docs/             # Technical documentation
+    └── guides/       # Development workflow guides
 ```
+
+**Where should my contribution go?**
+
+- **Research & Analysis**: Upload to `/research/` (see [Research Guidelines](docs/guides/RESEARCH_GUIDELINES.md))
+- **Draft Specifications**: Place in `/drafts/` until finalized
+- **Production Code**: Implement in `/src/`
+- **Supporting Tools**: Create in `/satellites/` if independent
+- **Documentation**: Add to `/docs/`
+
+**Development Process**: See [Development Workflow](docs/guides/DEVELOPMENT_WORKFLOW.md) for the full Ingestion → Digestion → Implementation process.
 
 ## Commit Message Guidelines
 

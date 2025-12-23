@@ -17,9 +17,9 @@ on:
         default: '30'
   push:
     paths:
-      - 'PORTFOLIO_VIDEO_SCRIPT.md'
-      - '**/*SCRIPT*.md'
-      - 'video_production_agent.py'
+      - 'satellites/portfolio/PORTFOLIO_VIDEO_SCRIPT.md'
+      - 'satellites/**/*SCRIPT*.md'
+      - 'satellites/video-production/video_production_agent.py'
 
 permissions:
   contents: write
@@ -67,7 +67,7 @@ jobs:
       - name: Configure video production
         run: |
           echo "REPO_ROOT=${{ github.workspace }}" >> $GITHUB_ENV
-          echo "SCRIPT_DIR=${{ github.workspace }}" >> $GITHUB_ENV
+          echo "SCRIPT_DIR=${{ github.workspace }}/satellites/portfolio" >> $GITHUB_ENV
           echo "SCRIPT_PATTERN=${{ github.event.inputs.script_pattern || '*SCRIPT*.md' }}" >> $GITHUB_ENV
           echo "VIDEO_OUT_DIR=${{ github.workspace }}/video_output" >> $GITHUB_ENV
           echo "VOICE_MODE=local_tts" >> $GITHUB_ENV
@@ -78,7 +78,7 @@ jobs:
       
       - name: Run video production agent
         run: |
-          python video_production_agent.py
+          python satellites/video-production/video_production_agent.py
       
       - name: List generated videos
         run: |
