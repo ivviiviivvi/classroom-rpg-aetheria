@@ -5,7 +5,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Checkbox } from '@/components/ui/checkbox'
 import { 
@@ -22,6 +21,8 @@ import { motion } from 'framer-motion'
 import type { Realm, Quest, Theme } from '@/lib/types'
 import { THEME_CONFIGS } from '@/lib/types'
 import { generateId } from '@/lib/game-utils'
+import { ExportPackageSchema } from '@/lib/schemas'
+import { z } from 'zod'
 
 interface ExportImportDialogProps {
   open: boolean
@@ -33,13 +34,7 @@ interface ExportImportDialogProps {
   onImportQuests: (quests: Quest[]) => void
 }
 
-interface ExportPackage {
-  version: string
-  exportedAt: number
-  realms: Realm[]
-  quests: Quest[]
-  theme: Theme
-}
+type ExportPackage = z.infer<typeof ExportPackageSchema>
 
 export function ExportImportDialog({
   open,
@@ -106,11 +101,21 @@ export function ExportImportDialog({
 
   const handleImport = () => {
     try {
-      const importPackage: ExportPackage = JSON.parse(importText)
-
-      if (!importPackage.version || !importPackage.realms || !importPackage.quests) {
-        throw new Error('Invalid package format')
+      let parsedJson: unknown
+      try {
+        parsedJson = JSON.parse(importText)
+      } catch {
+        throw new Error('Invalid JSON format')
       }
+
+      const validationResult = ExportPackageSchema.safeParse(parsedJson)
+
+      if (!validationResult.success) {
+        console.error('Validation errors:', validationResult.error.format())
+        throw new Error('Invalid package structure')
+      }
+
+      const importPackage = validationResult.data
 
       const newRealms = importPackage.realms.map(realm => ({
         ...realm,
@@ -140,8 +145,9 @@ export function ExportImportDialog({
       setImportText('')
       onClose()
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Invalid package format or corrupted data'
       toast.error('Import failed', {
-        description: 'Invalid package format or corrupted data'
+        description: errorMessage
       })
     }
   }
