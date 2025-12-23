@@ -106,11 +106,18 @@ npm run kill         # Kill process on port 5000
 - [**CHANGELOG.md**](CHANGELOG.md) - Version history and changes
 - [**TECHNICAL_ROADMAP.md**](TECHNICAL_ROADMAP.md) - Future plans and roadmap
 
-### Video Production
+### Development Guides
 
-- [**VIDEO_PRODUCTION_QUICKSTART.md**](VIDEO_PRODUCTION_QUICKSTART.md) - Quick start guide
-- [**VIDEO_PRODUCTION_README.md**](VIDEO_PRODUCTION_README.md) - Complete documentation
-- [**PORTFOLIO_VIDEO_SCRIPT.md**](PORTFOLIO_VIDEO_SCRIPT.md) - Example script
+- [**docs/guides/DEVELOPMENT_WORKFLOW.md**](docs/guides/DEVELOPMENT_WORKFLOW.md) - Ingestion → Digestion → Implementation process
+- [**docs/guides/RESEARCH_GUIDELINES.md**](docs/guides/RESEARCH_GUIDELINES.md) - How to contribute research
+
+### Organized Sections
+
+- 🔬 [**research/**](research/) - Research, analysis, and evaluation documents
+- 📝 [**drafts/**](drafts/) - Work in progress, iterations, and experimental features
+- 🛰️ [**satellites/**](satellites/) - Auxiliary tools and utilities
+  - [Video Production](satellites/video-production/) - Autonomous video generation
+  - [Portfolio Videos](satellites/portfolio/) - Portfolio presentation generator
 
 ### Additional Resources
 
@@ -149,8 +156,13 @@ classroom-rpg-aetheria/
 │   ├── lib/              # Utility functions
 │   ├── styles/           # Global styles
 │   └── assets/           # Static assets
-├── docs/                 # Documentation
-├── video_output/         # Generated videos (gitignored)
+├── docs/                 # Technical documentation
+│   └── guides/           # Development guides and workflows
+├── research/             # 🔬 Research, analysis, and evaluations
+├── drafts/               # 📝 Work in progress and iterations
+├── satellites/           # 🛰️ Auxiliary tools and utilities
+│   ├── video-production/ # Autonomous video generation
+│   └── portfolio/        # Portfolio video generator
 └── public/               # Public assets
 ```
 
