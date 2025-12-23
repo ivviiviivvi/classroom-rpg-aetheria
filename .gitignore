@@ -32,3 +32,11 @@ pids
 .devcontainer/
 
 .spark-workbench-id
+
+# Video production outputs
+video_output/
+video_production.log
+
+# Python cache
+__pycache__/
+*.pyc

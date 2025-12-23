@@ -21,3 +21,33 @@ No problem! If you were just checking things out and don’t need to keep this c
 📄 License For Spark Template Resources 
 
 The Spark Template files and resources from GitHub are licensed under the terms of the MIT license, Copyright GitHub, Inc.
+
+---
+
+## 🎬 Autonomous Video Production
+
+This repository includes an automated video production agent that generates professional MP4 videos from portfolio scripts.
+
+### Quick Start
+
+```bash
+# Generate videos locally
+python3 video_production_agent.py
+
+# Or use GitHub Actions: Actions → Generate Portfolio Videos → Run workflow
+```
+
+### Documentation
+
+- [VIDEO_PRODUCTION_QUICKSTART.md](VIDEO_PRODUCTION_QUICKSTART.md) - Quick start guide
+- [VIDEO_PRODUCTION_README.md](VIDEO_PRODUCTION_README.md) - Complete documentation
+- [PORTFOLIO_VIDEO_SCRIPT.md](PORTFOLIO_VIDEO_SCRIPT.md) - Example script
+
+### Features
+
+✅ Script parsing with timecode detection  
+✅ Local TTS audio generation (espeak)  
+✅ Automated visual generation (FFmpeg)  
+✅ Timeline synchronization  
+✅ MP4 rendering (1920x1080@30fps)  
+✅ GitHub Actions integration  
