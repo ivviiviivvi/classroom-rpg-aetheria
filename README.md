@@ -99,6 +99,7 @@ npm run kill         # Kill process on port 5000
 
 ### Project Documentation
 
+- [**ORGANIZATION.md**](ORGANIZATION.md) - 📁 Repository structure and file organization guide
 - [**CONTRIBUTING.md**](CONTRIBUTING.md) - How to contribute to the project
 - [**CODE_OF_CONDUCT.md**](CODE_OF_CONDUCT.md) - Community guidelines
 - [**SUPPORT.md**](SUPPORT.md) - Getting help and support
