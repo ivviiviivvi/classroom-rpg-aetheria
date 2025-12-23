@@ -1,0 +1,43 @@
+# Code Owners
+
+# This file defines individuals or teams responsible for code in this repository.
+# Code owners are automatically requested for review when someone opens a pull request
+# that modifies code they own.
+
+# Default owners for everything in the repository
+# These owners will be the default owners for everything in the repo.
+# Unless a later match takes precedence, they will be requested for review.
+*       @ivviiviivvi
+
+# Documentation
+*.md    @ivviiviivvi
+docs/   @ivviiviivvi
+
+# Configuration files
+*.json          @ivviiviivvi
+*.yaml          @ivviiviivvi
+*.yml           @ivviiviivvi
+.github/        @ivviiviivvi
+
+# Frontend code
+src/            @ivviiviivvi
+*.tsx           @ivviiviivvi
+*.ts            @ivviiviivvi
+*.css           @ivviiviivvi
+
+# Build and tooling configuration
+*.config.js     @ivviiviivvi
+*.config.ts     @ivviiviivvi
+package.json    @ivviiviivvi
+tsconfig.json   @ivviiviivvi
+vite.config.ts  @ivviiviivvi
+
+# Video production
+video_production_agent.py       @ivviiviivvi
+*SCRIPT*.md                     @ivviiviivvi
+VIDEO_PRODUCTION*.md            @ivviiviivvi
+
+# Security and governance
+SECURITY.md             @ivviiviivvi
+CODE_OF_CONDUCT.md      @ivviiviivvi
+CONTRIBUTING.md         @ivviiviivvi

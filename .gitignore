@@ -7,36 +7,125 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*-dist
+# Dependencies
+node_modules/
+packages/
+jspm_packages/
+
+# Build outputs
+dist/
+dist-ssr/
+*-dist/
+build/
 *.local
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Cache directories
+.cache/
+.eslintcache
+.parcel-cache/
+.npm/
+.yarn/
+.pnpm-store/
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+!.vscode/settings.json
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+*.swp
+*.swo
+*~
 
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Environment files
 .env
-**/agent-eval-report*
-packages
-pids
-.file-manifest
-.devcontainer/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
 
+# Temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# Agent and AI related
+**/agent-eval-report*
+.file-manifest
 .spark-workbench-id
+
+# DevContainer
+.devcontainer/
 
 # Video production outputs
 video_output/
 video_production.log
 
-# Python cache
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+.eggs/
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+.installed.cfg
+*.egg-info/
+.venv/
+venv/
+ENV/
+env/
+.python-version
+.pytest_cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pre-commit
+.pre-commit-config.yaml.backup
+
+# IDEs
+*.iml
+.project
+.classpath
+.settings/
+
+# Process IDs
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# TypeScript
+*.tsbuildinfo
+
+# Misc
+.history/
+*.bak
+*.orig
