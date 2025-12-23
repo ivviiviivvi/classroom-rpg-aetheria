@@ -1,0 +1,15 @@
+# Video Production Agent Dependencies
+# These are all standard library or minimal dependencies
+# No external Python packages required for basic functionality
+
+# The agent uses system tools:
+# - ffmpeg (required): For video rendering and audio processing
+# - espeak or pico2wave (optional): For text-to-speech generation
+# - ffprobe (comes with ffmpeg): For video analysis
+
+# If you want to add optional enhancements, consider:
+# - playwright>=1.40.0  # For browser automation and demo capture
+# - pillow>=10.0.0      # For advanced image processing
+# - opencv-python>=4.8.0  # For video frame manipulation
+# - pyttsx3>=2.90       # For alternative TTS engine
+# - gtts>=2.5.0         # For Google Text-to-Speech
