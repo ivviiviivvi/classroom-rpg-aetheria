@@ -9,21 +9,21 @@ This directory contains comprehensive documentation for the project:
 ### 🏗️ Architecture
 
 - [**Overview**](architecture/overview.md) - System architecture overview
-- [**Components**](architecture/components.md) - Component architecture
-- [**Data Flow**](architecture/data-flow.md) - Application data flow
+- **Components** (coming soon) - Component architecture
+- **Data Flow** (coming soon) - Application data flow
 
 ### 📖 Guides
 
-- [**Getting Started**](guides/getting-started.md) - Quick start guide
-- [**Development Setup**](guides/development-setup.md) - Development environment setup
-- [**Deployment**](guides/deployment.md) - Deployment instructions
-- [**Best Practices**](guides/best-practices.md) - Coding best practices
+- **Getting Started** (coming soon) - Quick start guide
+- **Development Setup** (coming soon) - Development environment setup
+- **Deployment** (coming soon) - Deployment instructions
+- **Best Practices** (coming soon) - Coding best practices
 
 ### 🔌 API
 
-- [**API Reference**](api/README.md) - API documentation
-- [**Components API**](api/components.md) - Component API reference
-- [**Hooks API**](api/hooks.md) - Custom hooks reference
+- **API Reference** (coming soon) - API documentation
+- **Components API** (coming soon) - Component API reference
+- **Hooks API** (coming soon) - Custom hooks reference
 
 ## 🚀 Quick Links
 

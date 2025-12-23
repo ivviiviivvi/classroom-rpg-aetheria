@@ -40,7 +40,7 @@ Classroom RPG: Aetheria is built using a modern, component-based architecture le
 
 ### State Management
 - **React Hooks**: useState, useEffect, useContext, and custom hooks
-- **React Query**: Server state management (if applicable)
+- **Local State**: Component-level state management
 
 ### Automation
 - **Python 3.11+**: Video production automation
@@ -111,6 +111,6 @@ The architecture is designed to scale:
 
 ## Related Documentation
 
-- [Component Architecture](components.md)
-- [Data Flow](data-flow.md)
-- [Best Practices](../guides/best-practices.md)
+- [Best Practices](../guides/best-practices.md) (coming soon)
+- [Component Architecture](components.md) (coming soon)
+- [Data Flow](data-flow.md) (coming soon)

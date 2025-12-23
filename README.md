@@ -60,28 +60,28 @@ Classroom RPG: Aetheria transforms traditional classroom activities into engagin
 
 1. **Clone the repository**
 
-\`\`\`bash
+```bash
 git clone https://github.com/ivviiviivvi/classroom-rpg-aetheria.git
 cd classroom-rpg-aetheria
-\`\`\`
+```
 
 2. **Install dependencies**
 
-\`\`\`bash
+```bash
 npm install
-\`\`\`
+```
 
 3. **Start development server**
 
-\`\`\`bash
+```bash
 npm run dev
-\`\`\`
+```
 
-The application will be available at \`http://localhost:5173\`
+The application will be available at `http://localhost:5173`
 
 ### Quick Commands
 
-\`\`\`bash
+```bash
 # Development
 npm run dev          # Start dev server with hot reload
 npm run build        # Build for production
@@ -93,7 +93,7 @@ npm run optimize     # Optimize dependencies
 
 # Utilities
 npm run kill         # Kill process on port 5000
-\`\`\`
+```
 
 ## 📖 Documentation
 
@@ -137,7 +137,7 @@ npm run kill         # Kill process on port 5000
 
 ### Project Structure
 
-\`\`\`
+```
 classroom-rpg-aetheria/
 ├── .github/              # GitHub configuration
 │   ├── ISSUE_TEMPLATE/   # Issue templates
@@ -152,14 +152,14 @@ classroom-rpg-aetheria/
 ├── docs/                 # Documentation
 ├── video_output/         # Generated videos (gitignored)
 └── public/               # Public assets
-\`\`\`
+```
 
 ### Development Workflow
 
-1. Create a feature branch: \`git checkout -b feature/your-feature\`
+1. Create a feature branch: `git checkout -b feature/your-feature`
 2. Make your changes
-3. Run linter: \`npm run lint\`
-4. Build: \`npm run build\`
+3. Run linter: `npm run lint`
+4. Build: `npm run build`
 5. Commit: Follow [Conventional Commits](https://www.conventionalcommits.org/)
 6. Push and create a pull request
 
@@ -187,21 +187,21 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 New to the project? Look for issues labeled:
 
-- \`good first issue\` - Perfect for newcomers
-- \`help wanted\` - Extra attention needed
-- \`documentation\` - Documentation improvements
+- `good first issue` - Perfect for newcomers
+- `help wanted` - Extra attention needed
+- `documentation` - Documentation improvements
 
 ## 🎬 Video Production
 
 ### Quick Start
 
-\`\`\`bash
+```bash
 # Generate videos locally
 python3 video_production_agent.py
 
 # Or use GitHub Actions
 # Go to: Actions → Generate Portfolio Videos → Run workflow
-\`\`\`
+```
 
 ### Features
 
@@ -226,7 +226,7 @@ Security is a top priority. If you discover a security vulnerability:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-\`\`\`
+```
 MIT License
 
 Copyright GitHub, Inc.
@@ -234,7 +234,7 @@ Copyright GitHub, Inc.
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction...
-\`\`\`
+```
 
 ## 🙏 Acknowledgments
 

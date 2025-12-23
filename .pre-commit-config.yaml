@@ -85,6 +85,7 @@ repos:
       - id: detect-secrets
         args: ['--baseline', '.secrets.baseline']
         exclude: package-lock.json
+        # Note: Run 'detect-secrets scan > .secrets.baseline' to create the baseline file
 
 # Configuration for specific hooks
 default_language_version:
