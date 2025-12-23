@@ -46,6 +46,29 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Configuration constants
+PICO2WAVE_TEXT_LIMIT = 32767  # Maximum text length for pico2wave TTS
+SPEAKING_RATE_WPM = 150  # Words per minute for speech estimation
+MIN_SCENE_DURATION = 3.0  # Minimum scene duration in seconds
+
+# Font configuration (fallback to system defaults)
+FONT_PATHS = [
+    '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',  # Linux
+    '/System/Library/Fonts/Helvetica.ttc',  # macOS
+    'C:\\Windows\\Fonts\\arial.ttf',  # Windows
+]
+FONT_PATHS_REGULAR = [
+    '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',  # Linux
+    '/System/Library/Fonts/Helvetica.ttc',  # macOS
+    'C:\\Windows\\Fonts\\arial.ttf',  # Windows
+]
+
+# Title card styling
+TITLE_FONT_SIZE = 72
+SUBTITLE_FONT_SIZE = 36
+TITLE_Y_OFFSET = -50
+SUBTITLE_Y_OFFSET = 50
+
 
 @dataclass
 class Scene:
@@ -173,8 +196,8 @@ class VideoProductionAgent:
             else:
                 # Estimate duration based on content length
                 word_count = len(scene_content.split())
-                # Assume 150 words per minute speaking rate
-                duration = max(3.0, (word_count / 150) * 60)
+                # Use configured speaking rate
+                duration = max(MIN_SCENE_DURATION, (word_count / SPEAKING_RATE_WPM) * 60)
             
             # Extract visual notes (look for [ON SCREEN: ...] or **[...]**)
             visual_notes = ""
@@ -261,7 +284,7 @@ class VideoProductionAgent:
                     'pico2wave',
                     '-l', 'en-US',
                     '-w', str(audio_file),
-                    full_narration[:32767]  # pico2wave has text length limit
+                    full_narration[:PICO2WAVE_TEXT_LIMIT]  # pico2wave text length limit
                 ], check=True, capture_output=True)
                 tts_success = True
                 logger.info(f"Generated audio using pico2wave: {audio_file}")
@@ -337,18 +360,46 @@ class VideoProductionAgent:
         title_clean = title.replace(':', '\\:').replace("'", "\\'")[:100]
         subtitle_clean = subtitle.replace(':', '\\:').replace("'", "\\'")[:200]
         
+        # Find available fonts
+        font_bold = None
+        font_regular = None
+        
+        for font_path in FONT_PATHS:
+            if Path(font_path).exists():
+                font_bold = font_path
+                break
+        
+        for font_path in FONT_PATHS_REGULAR:
+            if Path(font_path).exists():
+                font_regular = font_path
+                break
+        
         # Create title card with FFmpeg
         try:
-            subprocess.run([
-                'ffmpeg',
-                '-f', 'lavfi',
-                '-i', f'color=c=0x1e293b:s={width}x{height}:d=1',
-                '-vf', f"drawtext=text='{title_clean}':fontcolor=white:fontsize=72:x=(w-text_w)/2:y=(h-text_h)/2-50:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf,"
-                       f"drawtext=text='{subtitle_clean}':fontcolor=0xcccccc:fontsize=36:x=(w-text_w)/2:y=(h-text_h)/2+50:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-                '-frames:v', '1',
-                '-y',
-                str(output_path)
-            ], check=True, capture_output=True)
+            if font_bold and font_regular:
+                # With custom fonts
+                subprocess.run([
+                    'ffmpeg',
+                    '-f', 'lavfi',
+                    '-i', f'color=c=0x1e293b:s={width}x{height}:d=1',
+                    '-vf', f"drawtext=text='{title_clean}':fontcolor=white:fontsize={TITLE_FONT_SIZE}:x=(w-text_w)/2:y=(h-text_h)/2{TITLE_Y_OFFSET}:fontfile={font_bold},"
+                           f"drawtext=text='{subtitle_clean}':fontcolor=0xcccccc:fontsize={SUBTITLE_FONT_SIZE}:x=(w-text_w)/2:y=(h-text_h)/2+{SUBTITLE_Y_OFFSET}:fontfile={font_regular}",
+                    '-frames:v', '1',
+                    '-y',
+                    str(output_path)
+                ], check=True, capture_output=True)
+            else:
+                # Without font specification (use FFmpeg defaults)
+                subprocess.run([
+                    'ffmpeg',
+                    '-f', 'lavfi',
+                    '-i', f'color=c=0x1e293b:s={width}x{height}:d=1',
+                    '-vf', f"drawtext=text='{title_clean}':fontcolor=white:fontsize={TITLE_FONT_SIZE}:x=(w-text_w)/2:y=(h-text_h)/2{TITLE_Y_OFFSET},"
+                           f"drawtext=text='{subtitle_clean}':fontcolor=0xcccccc:fontsize={SUBTITLE_FONT_SIZE}:x=(w-text_w)/2:y=(h-text_h)/2+{SUBTITLE_Y_OFFSET}",
+                    '-frames:v', '1',
+                    '-y',
+                    str(output_path)
+                ], check=True, capture_output=True)
             logger.debug(f"Created title card: {output_path.name}")
         except subprocess.CalledProcessError as e:
             logger.warning(f"Failed to create title card with text, creating solid color card: {e}")

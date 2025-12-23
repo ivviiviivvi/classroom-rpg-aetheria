@@ -91,7 +91,7 @@ jobs:
           
           echo ""
           echo "Video output directory structure:"
-          tree video_output/ || find video_output/ -type f
+          find video_output/ -type f -o -type d | sort
       
       - name: Upload video artifacts
         uses: actions/upload-artifact@v4
