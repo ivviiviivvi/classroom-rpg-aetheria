@@ -43,22 +43,39 @@ A comprehensive 25-minute video presentation showcasing Classroom RPG: Aetheria 
 - **Technical Approach**: Systems thinking and human-centered design
 
 **Video Details:**
-- 📹 **Duration**: 25 minutes (1542 seconds)
+- 📹 **Duration**: 25 minutes 42 seconds (1542 seconds)
 - 🎥 **Quality**: Full HD 1080p @ 30fps
 - 🗣️ **Audio**: Computer-generated narration
 - 📊 **Content**: 45 scenes covering problem, solution, and impact
 
 ### How to Access
 
-**Option 1: Generate the Video Locally**
+**Quick Start: Generate the Video Locally (Recommended)**
+```bash
+# Make the script executable (first time only)
+chmod +x generate_video.sh
+
+# Generate the portfolio video (handles dependencies and environment setup)
+./generate_video.sh
+
+# Video will be created in: video_output/PORTFOLIO_VIDEO_SCRIPT_video.mp4
+```
+
+**Advanced: Manual Generation with Custom Configuration**
 ```bash
 # Install dependencies (Linux/Ubuntu)
 sudo apt-get install -y ffmpeg espeak espeak-data fonts-dejavu-core
 
+# Set environment variables for custom configuration
+export REPO_ROOT="$(pwd)"
+export SCRIPT_DIR="$(pwd)/satellites/portfolio"
+export SCRIPT_PATTERN="*SCRIPT*.md"
+export VIDEO_OUT_DIR="$(pwd)/video_output"
+export VIDEO_RESOLUTION="1920x1080"
+export FPS="30"
+
 # Run video production agent
 python3 satellites/video-production/video_production_agent.py
-
-# Video will be created in: video_output/PORTFOLIO_VIDEO_SCRIPT_video.mp4
 ```
 
 **Option 2: Use GitHub Actions**

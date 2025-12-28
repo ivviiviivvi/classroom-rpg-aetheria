@@ -10,7 +10,7 @@ A professionally-generated portfolio video presentation of the **Classroom RPG: 
 - **Format**: MP4 (H.264 video, AAC audio)
 - **Resolution**: 1920x1080 (Full HD)
 - **Frame Rate**: 30 fps
-- **Duration**: ~25 minutes (1542 seconds)
+- **Duration**: 25 minutes 42 seconds (1542 seconds)
 - **File Size**: 29 MB
 - **Audio**: Computer-generated narration using espeak TTS
 - **Visuals**: 45 title cards with scene-by-scene presentation
@@ -65,9 +65,28 @@ video_output/
 
 ## How to Access the Video
 
-### Option 1: Generate Locally
+### Option 1: Quick Start (Recommended)
 
-If the video is not included in the repository (due to size constraints), you can generate it yourself:
+Use the automated generation script that handles all dependencies and configuration:
+
+```bash
+# Make the script executable (first time only)
+chmod +x generate_video.sh
+
+# Generate the video
+./generate_video.sh
+```
+
+The script will:
+- Check for required dependencies (FFmpeg, espeak, Python)
+- Set up environment variables automatically
+- Validate file locations
+- Generate the video with clear progress reporting
+- Handle errors with helpful messages
+
+### Option 2: Manual Generation (Advanced)
+
+For custom configurations or troubleshooting, you can run the steps manually:
 
 ```bash
 # Install dependencies (Linux/Ubuntu)
@@ -78,10 +97,10 @@ sudo apt-get install -y ffmpeg espeak espeak-data fonts-dejavu-core
 cd classroom-rpg-aetheria
 
 # Set environment variables
-export REPO_ROOT=$(pwd)
-export SCRIPT_DIR=$(pwd)/satellites/portfolio
+export REPO_ROOT="$(pwd)"
+export SCRIPT_DIR="$(pwd)/satellites/portfolio"
 export SCRIPT_PATTERN="*SCRIPT*.md"
-export VIDEO_OUT_DIR=$(pwd)/video_output
+export VIDEO_OUT_DIR="$(pwd)/video_output"
 
 # Run the video production agent
 python3 satellites/video-production/video_production_agent.py
@@ -89,7 +108,7 @@ python3 satellites/video-production/video_production_agent.py
 
 The video will be generated in the `video_output/` directory.
 
-### Option 2: GitHub Actions Workflow
+### Option 3: GitHub Actions Workflow
 
 The repository includes an automated workflow that generates videos on-demand:
 
@@ -99,7 +118,7 @@ The repository includes an automated workflow that generates videos on-demand:
 4. Wait for the workflow to complete (~5-10 minutes)
 5. Download the video from the workflow artifacts
 
-### Option 3: Download from Release
+### Option 4: Download from Release
 
 If a release has been created, the video may be available as a release asset:
 

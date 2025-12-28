@@ -4,6 +4,14 @@
 
 set -e
 
+# Verify we're in the repository root
+if [ ! -f "package.json" ] || [ ! -d "satellites" ]; then
+    echo "❌ Error: This script must be run from the repository root directory"
+    echo "   Current directory: $(pwd)"
+    echo "   Please cd to the classroom-rpg-aetheria directory and try again"
+    exit 1
+fi
+
 echo "=================================================================================="
 echo "   Classroom RPG Aetheria - Portfolio Video Generator"
 echo "=================================================================================="
@@ -46,10 +54,10 @@ echo "✅ All dependencies found"
 echo ""
 
 # Set environment variables
-export REPO_ROOT=$(pwd)
-export SCRIPT_DIR=$(pwd)/satellites/portfolio
+export REPO_ROOT="$(pwd)"
+export SCRIPT_DIR="$(pwd)/satellites/portfolio"
 export SCRIPT_PATTERN="*SCRIPT*.md"
-export VIDEO_OUT_DIR=$(pwd)/video_output
+export VIDEO_OUT_DIR="$(pwd)/video_output"
 export VOICE_MODE="local_tts"
 export VIDEO_RESOLUTION="1920x1080"
 export FPS="30"
