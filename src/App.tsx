@@ -30,6 +30,7 @@ import { Plus, Sparkle } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { sanitizeHTML } from '@/lib/sanitize'
 import { retryWithBackoff } from '@/lib/api-retry'
+import { trackError } from '@/lib/error-tracker'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -316,6 +317,12 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
 
       setSelectedQuestId(null)
     } catch (error) {
+      const err = error as Error
+      trackError(err, {
+        questId,
+        studentId: currentProfile.id,
+        operation: 'quest-evaluation'
+      })
       toast.error('An error occurred while evaluating your submission')
       console.error(error)
     }
