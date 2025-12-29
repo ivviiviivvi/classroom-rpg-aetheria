@@ -16,6 +16,19 @@ export default defineConfig({
     // DO NOT REMOVE
     createIconImportProxy() as PluginOption,
     sparkPlugin() as PluginOption,
+    // Add CSP headers for security
+    {
+      name: 'csp-headers',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          res.setHeader(
+            'Content-Security-Policy',
+            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
+          )
+          next()
+        })
+      }
+    } as PluginOption,
   ],
   resolve: {
     alias: {
