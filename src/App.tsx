@@ -319,7 +319,7 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
 
       setSelectedQuestId(null)
     } catch (error) {
-      const err = error as Error
+      const err = error instanceof Error ? error : new Error(String(error))
       trackError(err, {
         questId,
         studentId: currentProfile.id,

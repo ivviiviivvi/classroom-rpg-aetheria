@@ -24,8 +24,10 @@ function sendToAnalytics(metric: Metric) {
   
   // Send to Sentry if available
   if (import.meta.env.VITE_SENTRY_DSN) {
+    // CLS is unitless, others are in milliseconds
+    const unit = metric.name === 'CLS' ? 'none' : 'millisecond'
     Sentry.metrics.distribution(metric.name, metric.value, {
-      unit: 'millisecond',
+      unit,
       tags: { rating: metric.rating }
     })
   }

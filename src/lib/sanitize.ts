@@ -21,6 +21,6 @@ export function sanitizePlainText(input: string): string {
   // Remove angle brackets and other potentially dangerous characters
   return input
     .replace(/[<>]/g, '')  // Remove angle brackets
-    .replace(/["\0]/g, '')  // Remove quotes and null bytes
+    .replace(/["'\0]/g, '')  // Remove quotes and null bytes
     .trim()
 }
