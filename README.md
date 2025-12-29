@@ -6,9 +6,12 @@
 
 An innovative educational RPG platform built with React, TypeScript, and GitHub Spark, designed to gamify classroom learning experiences.
 
+> 🎬 **NEW**: [Portfolio Video Presentation](#-portfolio-video) - A 25-minute comprehensive video showcasing the platform for investors and employers
+
 ## 📋 Table of Contents
 
 - [Overview](#overview)
+- [Portfolio Video](#-portfolio-video)
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Documentation](#documentation)
@@ -26,6 +29,82 @@ Classroom RPG: Aetheria transforms traditional classroom activities into engagin
 - **Learning**: Reinforce educational concepts through interactive gameplay
 - **Collaboration**: Foster teamwork and social learning
 - **Progress Tracking**: Provide clear feedback on learning achievements
+
+## 🎬 Portfolio Video
+
+### Watch the Presentation
+
+A comprehensive 25-minute video presentation showcasing Classroom RPG: Aetheria for potential investors and employers. The video demonstrates:
+
+- **Business Problem**: 40% dropout rate in online learning platforms
+- **Strategic Insight**: Applying game design psychology to education
+- **Platform Solution**: AI-powered quest system with real-time feedback
+- **Impact Analysis**: Time savings, engagement metrics, and measurable outcomes
+- **Technical Approach**: Systems thinking and human-centered design
+
+**Video Details:**
+- 📹 **Duration**: 25 minutes 42 seconds (1542 seconds)
+- 🎥 **Quality**: Full HD 1080p @ 30fps
+- 🗣️ **Audio**: Computer-generated narration
+- 📊 **Content**: 45 scenes covering problem, solution, and impact
+
+### How to Access
+
+**Quick Start: Generate the Video Locally (Recommended)**
+```bash
+# Make the script executable (first time only)
+chmod +x generate_video.sh
+
+# Generate the portfolio video (handles dependencies and environment setup)
+./generate_video.sh
+
+# Video will be created in: video_output/PORTFOLIO_VIDEO_SCRIPT_video.mp4
+```
+
+**Advanced: Manual Generation with Custom Configuration**
+```bash
+# Install dependencies (Linux/Ubuntu)
+sudo apt-get install -y ffmpeg espeak espeak-data fonts-dejavu-core
+
+# Set environment variables for custom configuration
+export REPO_ROOT="$(pwd)"
+export SCRIPT_DIR="$(pwd)/satellites/portfolio"
+export SCRIPT_PATTERN="*SCRIPT*.md"
+export VIDEO_OUT_DIR="$(pwd)/video_output"
+export VIDEO_RESOLUTION="1920x1080"
+export FPS="30"
+
+# Run video production agent
+python3 satellites/video-production/video_production_agent.py
+```
+
+**Option 2: Use GitHub Actions**
+1. Go to **Actions** → **Generate Portfolio Videos**
+2. Click **Run workflow**
+3. Download video from workflow artifacts
+
+**Option 3: Pre-built Version**
+Check the [Releases](../../releases) section for pre-generated videos.
+
+### Complete Documentation
+
+- 📖 **[VIDEO_PRESENTATION_GUIDE.md](VIDEO_PRESENTATION_GUIDE.md)** - Complete video documentation
+- 📝 **[Portfolio Video Script](satellites/portfolio/PORTFOLIO_VIDEO_SCRIPT.md)** - Full narration script
+- 🎨 **[Storyboard](satellites/portfolio/PORTFOLIO_VIDEO_STORYBOARD.md)** - Visual specifications
+- ⚙️ **[Production Agent](satellites/video-production/video_production_agent.py)** - Automation script
+
+### Usage Tips
+
+**For Job Applications:**
+- Include video link in portfolio websites
+- Share on LinkedIn profile
+- Use in follow-up communications
+- Perfect for product/strategy roles
+
+**For Investor Pitches:**
+- First 4:30 minutes = executive summary
+- Full video = comprehensive technical detail
+- Demonstrates strategic thinking capability
 
 ## ✨ Features
 
