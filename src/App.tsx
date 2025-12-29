@@ -28,6 +28,9 @@ import { ThemeBackground3D } from '@/components/ThemeBackground3D'
 import { Button } from '@/components/ui/button'
 import { Plus, Sparkle } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
+import { sanitizeHTML } from '@/lib/sanitize'
+import { retryWithBackoff } from '@/lib/api-retry'
+import { trackError } from '@/lib/error-tracker'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -165,8 +168,17 @@ Provide:
 
 Format your response as JSON: {"score": number, "feedback": "string"}`
 
-      const result = await window.spark.llm(submissionPrompt, 'gpt-4o', true)
+      const result = await retryWithBackoff(
+        () => window.spark.llm(submissionPrompt, 'gpt-4o', true),
+        3,
+        2000
+      )
       const evaluation = JSON.parse(result)
+      
+      // Sanitize all string fields from evaluation to prevent XSS
+      if (evaluation.feedback) {
+        evaluation.feedback = sanitizeHTML(evaluation.feedback)
+      }
 
       const submission: Submission = {
         id: generateId(),
@@ -174,7 +186,7 @@ Format your response as JSON: {"score": number, "feedback": "string"}`
         studentId: currentProfile.id,
         content,
         score: evaluation.score,
-        feedback: evaluation.feedback,
+        feedback: evaluation.feedback || '',
         submittedAt: Date.now(),
         evaluatedAt: Date.now()
       }
@@ -246,14 +258,21 @@ Write a 3-4 paragraph study guide that:
 
 Keep the tone matching the ${themeConfig.oracleLabel} character.`
 
-        const crystalContent = await window.spark.llm(crystalPrompt, 'gpt-4o')
+        const crystalContent = await retryWithBackoff(
+          () => window.spark.llm(crystalPrompt, 'gpt-4o'),
+          3,
+          2000
+        )
+        
+        // Sanitize crystal content to prevent XSS
+        const sanitizedCrystalContent = sanitizeHTML(crystalContent)
 
         const crystal: KnowledgeCrystal = {
           id: generateId(),
           questId: quest.id,
           studentId: currentProfile.id,
           title: `Understanding ${quest.name}`,
-          content: crystalContent,
+          content: sanitizedCrystalContent,
           isAttuned: false,
           createdAt: Date.now()
         }
@@ -268,7 +287,16 @@ Description: ${quest.description}
 Create a simpler version that focuses on the core concept. Make it achievable for a struggling student.
 Just provide the quest name and description as JSON: {"name": "string", "description": "string"}`
 
-        const redemptionData = JSON.parse(await window.spark.llm(redemptionPrompt, 'gpt-4o', true))
+        const redemptionResult = await retryWithBackoff(
+          () => window.spark.llm(redemptionPrompt, 'gpt-4o', true),
+          3,
+          2000
+        )
+        const redemptionData = JSON.parse(redemptionResult)
+        
+        // Sanitize quest data to prevent XSS
+        redemptionData.name = sanitizeHTML(redemptionData.name)
+        redemptionData.description = sanitizeHTML(redemptionData.description)
 
         const redemptionQuest: Quest = {
           id: generateId(),
@@ -291,6 +319,12 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
 
       setSelectedQuestId(null)
     } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error))
+      trackError(err, {
+        questId,
+        studentId: currentProfile.id,
+        operation: 'quest-evaluation'
+      })
       toast.error('An error occurred while evaluating your submission')
       console.error(error)
     }

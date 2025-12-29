@@ -16,6 +16,23 @@ export default defineConfig({
     // DO NOT REMOVE
     createIconImportProxy() as PluginOption,
     sparkPlugin() as PluginOption,
+    // Add CSP headers for security
+    // Note: 'unsafe-inline' is currently required for:
+    // - Vite's HMR (Hot Module Replacement) in development
+    // - GitHub Spark's runtime functionality
+    // In production, consider implementing nonces or hashes for better security
+    {
+      name: 'csp-headers',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          res.setHeader(
+            'Content-Security-Policy',
+            "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
+          )
+          next()
+        })
+      }
+    } as PluginOption,
   ],
   resolve: {
     alias: {
