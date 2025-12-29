@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client'
 import { ErrorBoundary } from "react-error-boundary";
 import * as Sentry from '@sentry/react'
-import { onCLS, onFID, onFCP, onLCP, onTTFB } from 'web-vitals'
+import { onCLS, onFID, onFCP, onLCP, onTTFB, Metric } from 'web-vitals'
 import "@github/spark/spark"
 
 import App from './App.tsx'
@@ -16,7 +16,7 @@ import "./index.css"
 initErrorTracking()
 
 // Track Web Vitals
-function sendToAnalytics(metric: any) {
+function sendToAnalytics(metric: Metric) {
   // Log metrics in development
   if (import.meta.env.DEV) {
     console.log('Web Vital:', metric)

@@ -175,8 +175,10 @@ Format your response as JSON: {"score": number, "feedback": "string"}`
       )
       const evaluation = JSON.parse(result)
       
-      // Sanitize feedback to prevent XSS
-      evaluation.feedback = sanitizeHTML(evaluation.feedback)
+      // Sanitize all string fields from evaluation to prevent XSS
+      if (evaluation.feedback) {
+        evaluation.feedback = sanitizeHTML(evaluation.feedback)
+      }
 
       const submission: Submission = {
         id: generateId(),
@@ -184,7 +186,7 @@ Format your response as JSON: {"score": number, "feedback": "string"}`
         studentId: currentProfile.id,
         content,
         score: evaluation.score,
-        feedback: evaluation.feedback,
+        feedback: evaluation.feedback || '',
         submittedAt: Date.now(),
         evaluatedAt: Date.now()
       }

@@ -23,7 +23,8 @@ export default defineConfig({
         server.middlewares.use((req, res, next) => {
           res.setHeader(
             'Content-Security-Policy',
-            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
+            // Note: 'unsafe-inline' is needed for Vite HMR and GitHub Spark functionality
+            "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
           )
           next()
         })
