@@ -21,15 +21,21 @@ export const SANDBOX_DATA_VERSION = '1.0.0'
  * Check if sandbox mode is currently active
  */
 export function isSandboxMode(): boolean {
-  // Check URL parameter
-  const urlParams = new URLSearchParams(window.location.search)
-  if (urlParams.get('sandbox') === 'true' || urlParams.get('demo') === 'true') {
-    return true
+  // Check URL parameter (only in browser environment)
+  if (typeof window !== 'undefined') {
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('sandbox') === 'true' || urlParams.get('demo') === 'true') {
+      return true
+    }
   }
   
-  // Check localStorage
-  const stored = localStorage.getItem(SANDBOX_MODE_KEY)
-  return stored === 'true'
+  // Check localStorage (only in browser environment)
+  if (typeof localStorage !== 'undefined') {
+    const stored = localStorage.getItem(SANDBOX_MODE_KEY)
+    return stored === 'true'
+  }
+  
+  return false
 }
 
 /**

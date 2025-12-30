@@ -25,11 +25,23 @@ export function useSandboxKV<T>(key: string, defaultValue: T): [T, (value: T) =>
 
   // Initialize sandbox data on first mount
   useEffect(() => {
-    if (isSandboxMode() && !isInitialized && needsSandboxInitialization()) {
+    const inSandboxMode = isSandboxMode()
+    const needsInit = needsSandboxInitialization()
+    
+    if (inSandboxMode && !isInitialized && needsInit) {
       const demoData = initializeSandboxData()
       
-      // Map keys to demo data
-      const keyToDataMap: Record<string, any> = {
+      // Map keys to demo data with proper typing
+      type DemoDataMap = {
+        'aetheria-realms': typeof demoData.realms
+        'aetheria-quests': typeof demoData.quests
+        'aetheria-profile': typeof demoData.profile
+        'aetheria-submissions': typeof demoData.submissions
+        'aetheria-crystals': typeof demoData.crystals
+        'aetheria-all-profiles': typeof demoData.profile[]
+      }
+      
+      const keyToDataMap: Partial<DemoDataMap> = {
         'aetheria-realms': demoData.realms,
         'aetheria-quests': demoData.quests,
         'aetheria-profile': demoData.profile,
@@ -40,7 +52,7 @@ export function useSandboxKV<T>(key: string, defaultValue: T): [T, (value: T) =>
       
       // If this key has demo data, set it
       if (key in keyToDataMap) {
-        setValue(keyToDataMap[key])
+        setValue(keyToDataMap[key as keyof DemoDataMap] as T)
       }
       
       setIsInitialized(true)
