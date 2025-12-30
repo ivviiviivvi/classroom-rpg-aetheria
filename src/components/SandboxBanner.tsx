@@ -26,6 +26,8 @@ export function SandboxBanner() {
   const handleReset = () => {
     if (confirm('Reset sandbox data? This will restore all demo content to defaults.')) {
       resetSandboxData()
+      // Full page reload is intentional here to re-initialize all KV storage and state
+      // This ensures a completely clean slate with fresh demo data
       window.location.reload()
     }
   }
@@ -33,6 +35,8 @@ export function SandboxBanner() {
   const handleExit = () => {
     if (confirm('Exit sandbox mode? You will return to normal mode.')) {
       disableSandboxMode()
+      // Full page reload is necessary to switch between storage contexts
+      // (sandbox- prefixed keys vs normal keys)
       window.location.reload()
     }
   }

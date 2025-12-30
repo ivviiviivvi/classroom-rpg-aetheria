@@ -12,7 +12,7 @@ import {
   isSandboxMode, 
   needsSandboxInitialization,
   initializeSandboxData 
-} from './sandbox-mode'
+} from '@/lib/sandbox-mode'
 
 /**
  * Sandbox-aware version of useKV hook
