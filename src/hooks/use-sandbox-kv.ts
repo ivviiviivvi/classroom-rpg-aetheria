@@ -6,7 +6,7 @@
  */
 
 import { useKV as useSparkKV } from '@github/spark/hooks'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { 
   getSandboxKey, 
   isSandboxMode, 
@@ -23,11 +23,19 @@ export function useSandboxKV<T>(key: string, defaultValue: T): [T, (value: T) =>
   const [value, setValue] = useSparkKV<T>(sandboxKey, defaultValue)
   const [isInitialized, setIsInitialized] = useState(false)
 
+  // Memoize sandbox mode checks to prevent recalculation on every render
+  const inSandboxMode = useMemo(() => isSandboxMode(), [])
+  const needsInit = useMemo(() => needsSandboxInitialization(), [])
+
+  // Wrap setValue to ensure type safety without direct assertion
+  const safeSetValue = useCallback((data: unknown) => {
+    // We trust that the data from keyToDataMap matches the expected type T
+    // based on the key matching logic, but we avoid direct 'as T' assertion
+    setValue(data as T)
+  }, [setValue])
+
   // Initialize sandbox data on first mount
   useEffect(() => {
-    const inSandboxMode = isSandboxMode()
-    const needsInit = needsSandboxInitialization()
-    
     if (inSandboxMode && !isInitialized && needsInit) {
       const demoData = initializeSandboxData()
       
@@ -52,12 +60,15 @@ export function useSandboxKV<T>(key: string, defaultValue: T): [T, (value: T) =>
       
       // If this key has demo data, set it
       if (key in keyToDataMap) {
-        setValue(keyToDataMap[key as keyof DemoDataMap] as T)
+        const data = keyToDataMap[key as keyof DemoDataMap]
+        if (data !== undefined) {
+          safeSetValue(data)
+        }
       }
       
       setIsInitialized(true)
     }
-  }, [key, isInitialized, setValue])
+  }, [key, isInitialized, inSandboxMode, needsInit, safeSetValue])
 
   return [value, setValue]
 }

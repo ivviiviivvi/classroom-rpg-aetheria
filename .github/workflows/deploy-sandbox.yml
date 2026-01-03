@@ -60,7 +60,6 @@ jobs:
 
       - name: Run tests
         run: npm test -- --run
-        continue-on-error: true
 
       - name: Build application
         run: npm run build
@@ -108,39 +107,6 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: Comment deployment URL on PR
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const deploymentUrl = '${{ steps.deployment.outputs.page_url }}';
-            const comment = `## 🏖️ Sandbox Deployment
-            
-            Your changes have been deployed to a sandbox environment!
-            
-            **Sandbox URL**: ${deploymentUrl}?sandbox=true
-            
-            ### What is Sandbox Mode?
-            - ✅ Isolated demo data
-            - ✅ Safe to explore without affecting real classrooms
-            - ✅ Pre-populated with example content
-            - ✅ Reset functionality available
-            
-            ### How to Use
-            1. Click the sandbox URL above
-            2. Explore the application with demo data
-            3. Test your changes safely
-            4. Use "Reset Demo" to restore defaults
-            
-            **Note**: This is a temporary deployment for testing. Changes made in sandbox mode do not persist between sessions.`;
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
 
   preview-comment:
     name: Preview Deployment Comment

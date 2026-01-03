@@ -42,6 +42,10 @@ export function isSandboxMode(): boolean {
  * Enable sandbox mode
  */
 export function enableSandboxMode(): void {
+  if (typeof localStorage === 'undefined') {
+    console.warn('localStorage not available - cannot enable sandbox mode')
+    return
+  }
   localStorage.setItem(SANDBOX_MODE_KEY, 'true')
   console.log('🏖️ Sandbox mode enabled - You are exploring with demo data')
 }
@@ -50,6 +54,10 @@ export function enableSandboxMode(): void {
  * Disable sandbox mode
  */
 export function disableSandboxMode(): void {
+  if (typeof localStorage === 'undefined') {
+    console.warn('localStorage not available - cannot disable sandbox mode')
+    return
+  }
   localStorage.removeItem(SANDBOX_MODE_KEY)
   console.log('✅ Sandbox mode disabled - Returning to normal mode')
 }
@@ -81,6 +89,11 @@ export function getSandboxKey(key: string): string {
 export function resetSandboxData(): void {
   if (!isSandboxMode()) {
     console.warn('Cannot reset sandbox data when not in sandbox mode')
+    return
+  }
+  
+  if (typeof localStorage === 'undefined') {
+    console.warn('localStorage not available - cannot reset sandbox data')
     return
   }
   
@@ -302,6 +315,10 @@ export function getSandboxBanner(): string {
  */
 export function needsSandboxInitialization(): boolean {
   if (!isSandboxMode()) {
+    return false
+  }
+  
+  if (typeof localStorage === 'undefined') {
     return false
   }
   

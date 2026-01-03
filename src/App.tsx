@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ErrorFallback } from '@/components/ErrorFallback'
@@ -85,6 +85,9 @@ function App() {
   const [levelUpData, setLevelUpData] = useState<{ level: number; role: Role }>({ level: 1, role: 'student' })
   const mainRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile()
+  
+  // Memoize sandbox mode check to prevent recalculation on every render
+  const isInSandboxMode = useMemo(() => isSandboxMode(), [])
   
   const [realms, setRealms] = useSandboxKV<Realm[]>('aetheria-realms', [])
   const [quests, setQuests] = useSandboxKV<Quest[]>('aetheria-quests', [])
@@ -433,7 +436,7 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden relative">
       {/* Sandbox mode banner */}
-      {isSandboxMode() && <SandboxBanner />}
+      {isInSandboxMode && <SandboxBanner />}
       
       <ParticleField count={isMobile ? 20 : 40} speed={0.2} />
       
