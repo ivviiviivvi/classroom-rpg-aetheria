@@ -108,6 +108,12 @@ python3 satellites/video-production/video_production_agent.py
 
 The video will be generated in the `video_output/` directory.
 
+**Tip**: For videos with live app demos, set `DEMO_URL` to the sandbox environment:
+```bash
+export DEMO_URL="https://ivviiviivvi.github.io/classroom-rpg-aetheria/?sandbox=true"
+```
+This ensures consistent demo data for professional presentations.
+
 ### Option 3: GitHub Actions Workflow
 
 The repository includes an automated workflow that generates videos on-demand:

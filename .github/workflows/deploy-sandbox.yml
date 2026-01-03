@@ -1,0 +1,178 @@
+name: Deploy Sandbox Environment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: false
+        default: 'sandbox'
+        type: choice
+        options:
+          - sandbox
+          - demo
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'package.json'
+      - 'vite.config.ts'
+      - '.github/workflows/deploy-sandbox.yml'
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'src/**'
+      - 'public/**'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  pull-requests: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Sandbox Application
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Run tests
+        run: npm test -- --run
+
+      - name: Build application
+        run: npm run build
+        env:
+          # Force sandbox mode via environment
+          VITE_SANDBOX_MODE: 'true'
+          VITE_APP_BASE_URL: '/classroom-rpg-aetheria/'
+
+      - name: Create sandbox indicator
+        run: |
+          echo '{"sandboxMode": true, "version": "1.0.0", "buildDate": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"}' > dist/sandbox-info.json
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sandbox-build
+          path: dist/
+          retention-days: 7
+
+  deploy-pages:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: sandbox-build
+          path: dist/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  preview-comment:
+    name: Preview Deployment Comment
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `## 🎭 Sandbox Preview Available
+            
+            A sandbox preview build has been created for this PR.
+            
+            ### Preview Options:
+            1. **GitHub Pages** (when merged): Available at \`https://ivviiviivvi.github.io/classroom-rpg-aetheria/?sandbox=true\`
+            2. **Local Testing**: Download the artifact and run locally
+            3. **Review Build**: Check the build artifact for compilation issues
+            
+            ### Testing Checklist:
+            - [ ] Application builds without errors
+            - [ ] Tests pass successfully
+            - [ ] Sandbox mode activates correctly
+            - [ ] Demo data loads properly
+            - [ ] UI changes render as expected
+            
+            Download the \`sandbox-build\` artifact from this workflow run to test locally.`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  summary:
+    name: Deployment Summary
+    needs: [build, deploy-pages]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## 🏖️ Sandbox Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Build Status**: ${{ needs.build.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deploy Status**: ${{ needs.deploy-pages.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Event**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ needs.deploy-pages.result }}" == "success" ]; then
+            echo "### ✅ Deployment Successful" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The sandbox environment has been deployed successfully!" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Access URL**: https://ivviiviivvi.github.io/classroom-rpg-aetheria/?sandbox=true" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.build.result }}" == "success" ]; then
+            echo "### 📦 Build Successful" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The application built successfully. Download the artifact to test locally." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Deployment Failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Check the workflow logs for details." >> $GITHUB_STEP_SUMMARY
+          fi

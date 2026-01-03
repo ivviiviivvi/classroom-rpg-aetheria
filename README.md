@@ -6,11 +6,14 @@
 
 An innovative educational RPG platform built with React, TypeScript, and GitHub Spark, designed to gamify classroom learning experiences.
 
+> 🏖️ **Try the Sandbox**: [Explore with demo data](https://ivviiviivvi.github.io/classroom-rpg-aetheria/?sandbox=true) - Safe environment for testing and exploration
+> 
 > 🎬 **NEW**: [Portfolio Video Presentation](#-portfolio-video) - A 25-minute comprehensive video showcasing the platform for investors and employers
 
 ## 📋 Table of Contents
 
 - [Overview](#overview)
+- [Sandbox Environment](#-sandbox-environment)
 - [Portfolio Video](#-portfolio-video)
 - [Features](#features)
 - [Getting Started](#getting-started)
@@ -29,6 +32,40 @@ Classroom RPG: Aetheria transforms traditional classroom activities into engagin
 - **Learning**: Reinforce educational concepts through interactive gameplay
 - **Collaboration**: Foster teamwork and social learning
 - **Progress Tracking**: Provide clear feedback on learning achievements
+
+## 🏖️ Sandbox Environment
+
+### Try It Now!
+
+**Explore the platform safely with demo data**: [Launch Sandbox Mode](https://ivviiviivvi.github.io/classroom-rpg-aetheria/?sandbox=true)
+
+The Sandbox Environment provides a safe, isolated space for external users to explore Classroom RPG: Aetheria without affecting real classroom data.
+
+### What is Sandbox Mode?
+
+- ✅ **Isolated Demo Data**: All changes are completely separate from real classrooms
+- ✅ **Pre-populated Content**: 3 demo realms, 4 sample quests, and example progress
+- ✅ **Risk-Free Exploration**: Try all features without consequences
+- ✅ **Easy Reset**: Restore to defaults with one click
+- ✅ **Visual Indicators**: Clear banner shows you're in sandbox mode
+
+### Perfect For:
+
+- 🎯 **Product Demonstrations**: Showcase to potential schools or investors
+- 📚 **Teacher Training**: Experience the platform before classroom use
+- 🧪 **Feature Testing**: Try changes safely before production
+- 🔍 **User Research**: Gather feedback without risk
+- 🎬 **Video Production**: Record demos with consistent data
+
+### Quick Access:
+
+```bash
+# Any URL with sandbox parameter activates demo mode
+?sandbox=true
+?demo=true
+```
+
+**Complete Documentation**: See [SANDBOX_GUIDE.md](SANDBOX_GUIDE.md) for detailed usage instructions.
 
 ## 🎬 Portfolio Video
 
