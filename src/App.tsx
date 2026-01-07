@@ -1,10 +1,12 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ErrorFallback } from '@/components/ErrorFallback'
 import { useTheme, useRole } from '@/hooks/use-theme'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useTouchSwipe } from '@/hooks/use-touch-gestures'
+import { useSandboxKV } from '@/hooks/use-sandbox-kv'
+import { SandboxBanner } from '@/components/SandboxBanner'
 import { HUDSidebar } from '@/components/HUDSidebar'
 import { MobileNav } from '@/components/MobileNav'
 import { UniverseMap } from '@/components/UniverseMap'
@@ -31,6 +33,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { sanitizeHTML } from '@/lib/sanitize'
 import { retryWithBackoff } from '@/lib/api-retry'
 import { trackError } from '@/lib/error-tracker'
+import { isSandboxMode } from '@/lib/sandbox-mode'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -83,12 +86,15 @@ function App() {
   const mainRef = useRef<HTMLDivElement>(null)
   const isMobile = useIsMobile()
   
-  const [realms, setRealms] = useKV<Realm[]>('aetheria-realms', [])
-  const [quests, setQuests] = useKV<Quest[]>('aetheria-quests', [])
-  const [submissions, setSubmissions] = useKV<Submission[]>('aetheria-submissions', [])
-  const [crystals, setCrystals] = useKV<KnowledgeCrystal[]>('aetheria-crystals', [])
-  const [profile, setProfile] = useKV<UserProfile>('aetheria-profile', DEFAULT_PROFILE)
-  const [allProfiles, setAllProfiles] = useKV<UserProfile[]>('aetheria-all-profiles', [])
+  // Memoize sandbox mode check to prevent recalculation on every render
+  const isInSandboxMode = useMemo(() => isSandboxMode(), [])
+  
+  const [realms, setRealms] = useSandboxKV<Realm[]>('aetheria-realms', [])
+  const [quests, setQuests] = useSandboxKV<Quest[]>('aetheria-quests', [])
+  const [submissions, setSubmissions] = useSandboxKV<Submission[]>('aetheria-submissions', [])
+  const [crystals, setCrystals] = useSandboxKV<KnowledgeCrystal[]>('aetheria-crystals', [])
+  const [profile, setProfile] = useSandboxKV<UserProfile>('aetheria-profile', DEFAULT_PROFILE)
+  const [allProfiles, setAllProfiles] = useSandboxKV<UserProfile[]>('aetheria-all-profiles', [])
   const [soundVolume] = useKV<number>('aetheria-sound-volume', 0.3)
   const [soundMuted] = useKV<boolean>('aetheria-sound-muted', false)
 
@@ -429,6 +435,9 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden relative">
+      {/* Sandbox mode banner */}
+      {isInSandboxMode && <SandboxBanner />}
+      
       <ParticleField count={isMobile ? 20 : 40} speed={0.2} />
       
       {(currentView === 'realm-detail' || currentView === 'constellation') && selectedRealm && (
