@@ -2,6 +2,7 @@ import { ComponentProps, ComponentType, createContext, CSSProperties, ReactNode,
 import * as RechartsPrimitive from "recharts"
 
 import { cn } from "@/lib/utils"
+import { sanitizeCSS } from "@/lib/sanitize"
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const
@@ -88,7 +89,7 @@ ${colorConfig
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
       itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
+    return color ? `  --color-${key}: ${sanitizeCSS(color)};` : null
   })
   .join("\n")}
 }

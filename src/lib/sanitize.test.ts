@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { sanitizeHTML, sanitizePlainText } from './sanitize'
+import { sanitizeHTML, sanitizePlainText, sanitizeCSS } from './sanitize'
 
 describe('sanitizeHTML', () => {
   it('allows safe HTML tags', () => {
@@ -83,5 +83,46 @@ describe('sanitizePlainText', () => {
     const input = '<<<test>>>'
     const output = sanitizePlainText(input)
     expect(output).toBe('test')
+  })
+})
+
+describe('sanitizeCSS', () => {
+  it('removes semicolons', () => {
+    const input = 'blue; } body { display: none'
+    const output = sanitizeCSS(input)
+    expect(output).not.toContain(';')
+    expect(output).toBe('blue  body  display: none')
+  })
+
+  it('removes curly braces', () => {
+    const input = 'blue} body {display: none'
+    const output = sanitizeCSS(input)
+    expect(output).not.toContain('{')
+    expect(output).not.toContain('}')
+    expect(output).toBe('blue body display: none')
+  })
+
+  it('removes angle brackets', () => {
+    const input = 'blue</style><script>alert(1)</script>'
+    const output = sanitizeCSS(input)
+    expect(output).not.toContain('<')
+    expect(output).not.toContain('>')
+    expect(output).toBe('blue/stylescriptalert(1)/script')
+  })
+
+  it('allows valid color values', () => {
+    expect(sanitizeCSS('#ff0000')).toBe('#ff0000')
+    expect(sanitizeCSS('rgb(255, 0, 0)')).toBe('rgb(255, 0, 0)')
+    expect(sanitizeCSS('hsl(0, 100%, 50%)')).toBe('hsl(0, 100%, 50%)')
+    expect(sanitizeCSS('blue')).toBe('blue')
+  })
+
+  it('handles complex injection attempt', () => {
+    const input = 'blue; } body { background: url("http://evil.com")'
+    const output = sanitizeCSS(input)
+    expect(output).not.toContain(';')
+    expect(output).not.toContain('{')
+    expect(output).not.toContain('}')
+    expect(output).toBe('blue  body  background: url("http://evil.com")')
   })
 })

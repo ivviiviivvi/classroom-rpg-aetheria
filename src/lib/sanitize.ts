@@ -24,3 +24,16 @@ export function sanitizePlainText(input: string): string {
     .replace(/["'\0]/g, '')  // Remove quotes and null bytes
     .trim()
 }
+
+/**
+ * Sanitizes CSS values to prevent CSS injection
+ * @param value - Potentially unsafe CSS value
+ * @returns Sanitized CSS value
+ */
+export function sanitizeCSS(value: string): string {
+  // Remove potentially dangerous characters for CSS injection
+  // ; - separates properties
+  // {} - blocks
+  // <> - HTML tags (though in <style> context less relevant but good practice)
+  return value.replace(/[;{}<>]/g, '').trim()
+}
