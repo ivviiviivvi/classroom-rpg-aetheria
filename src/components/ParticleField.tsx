@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, memo } from 'react'
 
 interface Particle {
   x: number
@@ -14,7 +14,7 @@ interface ParticleFieldProps {
   speed?: number
 }
 
-export function ParticleField({ count = 50, speed = 0.3 }: ParticleFieldProps) {
+export const ParticleField = memo(function ParticleField({ count = 50, speed = 0.3 }: ParticleFieldProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const particlesRef = useRef<Particle[]>([])
   const dimensionsRef = useRef({ width: 0, height: 0 })
@@ -69,16 +69,23 @@ export function ParticleField({ count = 50, speed = 0.3 }: ParticleFieldProps) {
         ctx.fill()
       })
 
+      // Optimization: Using squared distance to avoid Math.sqrt in the loop
+      const CONNECT_DISTANCE = 150
+      const CONNECT_DISTANCE_SQ = CONNECT_DISTANCE * CONNECT_DISTANCE
+
       for (let i = 0; i < particlesRef.current.length; i++) {
         for (let j = i + 1; j < particlesRef.current.length; j++) {
           const p1 = particlesRef.current[i]
           const p2 = particlesRef.current[j]
           const dx = p1.x - p2.x
           const dy = p1.y - p2.y
-          const distance = Math.sqrt(dx * dx + dy * dy)
+          const distSq = dx * dx + dy * dy
 
-          if (distance < 150) {
-            const opacity = (1 - distance / 150) * 0.15
+          if (distSq < CONNECT_DISTANCE_SQ) {
+            // We only calculate sqrt here if we're actually going to draw the line
+            // This happens much less frequently than checking all pairs
+            const distance = Math.sqrt(distSq)
+            const opacity = (1 - distance / CONNECT_DISTANCE) * 0.15
             ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`
             ctx.lineWidth = 0.5
             ctx.beginPath()
@@ -108,4 +115,4 @@ export function ParticleField({ count = 50, speed = 0.3 }: ParticleFieldProps) {
       style={{ zIndex: 0 }}
     />
   )
-}
+})
