@@ -33,6 +33,7 @@ export function SoundSettings() {
           variant="ghost" 
           size="icon"
           className="glass-button"
+          aria-label="Sound settings"
         >
           {isMuted || (volume ?? 0.3) === 0 ? (
             <SpeakerSlash size={20} weight="fill" />
@@ -49,6 +50,7 @@ export function SoundSettings() {
               variant="ghost"
               size="icon"
               onClick={handleToggleMute}
+              aria-label={isMuted ? "Unmute sound" : "Mute sound"}
             >
               {isMuted ? (
                 <SpeakerSlash size={20} weight="fill" />
@@ -69,6 +71,7 @@ export function SoundSettings() {
               step={0.01}
               disabled={isMuted ?? false}
               className="w-full"
+              aria-label="Volume"
             />
           </div>
         </div>
