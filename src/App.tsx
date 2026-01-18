@@ -50,6 +50,7 @@ import {
   generateArtifactName, 
   getRarityFromScore 
 } from '@/lib/game-utils'
+import { cn, sanitizeLLMInput } from '@/lib/utils'
 import { THEME_CONFIGS } from '@/lib/types'
 import { DEFAULT_AVATAR } from '@/lib/avatar-options'
 import { soundEffects } from '@/lib/sound-effects'
@@ -153,11 +154,16 @@ function App() {
     if (!quest) return
 
     try {
+      const sanitizedContent = sanitizeLLMInput(content)
       const submissionPrompt = `You are the ${themeConfig.oracleLabel} in a gamified learning system. Evaluate this student submission.
 
 Quest: ${quest.name}
 Description: ${quest.description}
-Student Response: ${content}
+
+Student Response:
+<student_response>
+${sanitizedContent}
+</student_response>
 
 Provide:
 1. A score from 0-100
