@@ -27,6 +27,9 @@ function Planet({ realm, position, onClick, theme }: PlanetProps) {
   const [hovered, setHovered] = useState(false)
   const isMountedRef = useRef(true)
 
+  // Reuse Vector3 to avoid garbage collection in useFrame
+  const tempScale = useMemo(() => new THREE.Vector3(), [])
+
   useEffect(() => {
     isMountedRef.current = true
     return () => {
@@ -43,7 +46,8 @@ function Planet({ realm, position, onClick, theme }: PlanetProps) {
         meshRef.current.rotation.y += 0.002
         
         const targetScale = hovered ? 1.2 : 1
-        meshRef.current.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1)
+        tempScale.set(targetScale, targetScale, targetScale)
+        meshRef.current.scale.lerp(tempScale, 0.1)
       }
       
       if (groupRef.current) {
