@@ -1,30 +1,33 @@
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, Suspense } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { ErrorBoundary } from 'react-error-boundary'
 import { ErrorFallback } from '@/components/ErrorFallback'
+import { LoadingFallback } from '@/components/LoadingFallback'
 import { useTheme, useRole } from '@/hooks/use-theme'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useTouchSwipe } from '@/hooks/use-touch-gestures'
 import { HUDSidebar } from '@/components/HUDSidebar'
 import { MobileNav } from '@/components/MobileNav'
-import { UniverseMap } from '@/components/UniverseMap'
-import { BoardGameMap } from '@/components/BoardGameMap'
-import { RealmEditor } from '@/components/RealmEditor'
-import { RealmCreator } from '@/components/RealmCreator'
-import { QuestCreator } from '@/components/QuestCreator'
 import { QuestCard } from '@/components/QuestCard'
 import { QuestDialog } from '@/components/QuestDialog'
-import { ConstellationView } from '@/components/ConstellationView'
-import { CharacterSheet } from '@/components/CharacterSheet'
-import { ArchivesView } from '@/components/ArchivesView'
-import { Leaderboard } from '@/components/Leaderboard'
-import { TeacherDashboard } from '@/components/TeacherDashboard'
-import { AnalyticsDashboard } from '@/components/AnalyticsDashboard'
 import { ParticleField } from '@/components/ParticleField'
 import { LevelUpCelebration } from '@/components/LevelUpCelebration'
 import { QuickStats } from '@/components/QuickStats'
 import { GenerativeMusic } from '@/components/GenerativeMusic'
-import { ThemeBackground3D } from '@/components/ThemeBackground3D'
+
+// Lazy load heavy 3D and dashboard components
+const UniverseMap = React.lazy(() => import('@/components/UniverseMap').then(module => ({ default: module.UniverseMap })))
+const BoardGameMap = React.lazy(() => import('@/components/BoardGameMap').then(module => ({ default: module.BoardGameMap })))
+const RealmEditor = React.lazy(() => import('@/components/RealmEditor').then(module => ({ default: module.RealmEditor })))
+const RealmCreator = React.lazy(() => import('@/components/RealmCreator').then(module => ({ default: module.RealmCreator })))
+const QuestCreator = React.lazy(() => import('@/components/QuestCreator').then(module => ({ default: module.QuestCreator })))
+const ConstellationView = React.lazy(() => import('@/components/ConstellationView').then(module => ({ default: module.ConstellationView })))
+const CharacterSheet = React.lazy(() => import('@/components/CharacterSheet').then(module => ({ default: module.CharacterSheet })))
+const ArchivesView = React.lazy(() => import('@/components/ArchivesView').then(module => ({ default: module.ArchivesView })))
+const Leaderboard = React.lazy(() => import('@/components/Leaderboard').then(module => ({ default: module.Leaderboard })))
+const TeacherDashboard = React.lazy(() => import('@/components/TeacherDashboard').then(module => ({ default: module.TeacherDashboard })))
+const AnalyticsDashboard = React.lazy(() => import('@/components/AnalyticsDashboard').then(module => ({ default: module.AnalyticsDashboard })))
+const ThemeBackground3D = React.lazy(() => import('@/components/ThemeBackground3D').then(module => ({ default: module.ThemeBackground3D })))
 import { Button } from '@/components/ui/button'
 import { Plus, Sparkle } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
@@ -404,7 +407,9 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
             console.error('3D Background error:', error)
           }}
         >
-          <ThemeBackground3D theme={currentTheme} realmColor={selectedRealm.color} />
+          <Suspense fallback={null}>
+            <ThemeBackground3D theme={currentTheme} realmColor={selectedRealm.color} />
+          </Suspense>
         </ErrorBoundary>
       )}
       
@@ -498,11 +503,13 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
                 setTimeout(() => setCurrentView('world-map'), 100)
               }}
             >
-              <UniverseMap
-                realms={realms || []}
-                theme={currentTheme}
-                onRealmClick={handleRealmClick}
-              />
+              <Suspense fallback={<LoadingFallback />}>
+                <UniverseMap
+                  realms={realms || []}
+                  theme={currentTheme}
+                  onRealmClick={handleRealmClick}
+                />
+              </Suspense>
             </ErrorBoundary>
             <div className="absolute top-8 left-1/2 -translate-x-1/2 text-center space-y-2">
               <h1 className="text-5xl font-bold glow-text">Aetheria</h1>
@@ -536,16 +543,18 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
               transition={{ duration: 0.3 }}
               className="h-full"
             >
-              <BoardGameMap
-                quests={realmQuests}
-                theme={currentTheme}
-                onQuestClick={handleQuestClick}
-                onBack={() => setCurrentView('world-map')}
-                realmColor={selectedRealm.color}
-                realmName={selectedRealm.name}
-                role={currentRole}
-                onCreateQuest={() => setIsCreatingQuest(true)}
-              />
+              <Suspense fallback={<LoadingFallback />}>
+                <BoardGameMap
+                  quests={realmQuests}
+                  theme={currentTheme}
+                  onQuestClick={handleQuestClick}
+                  onBack={() => setCurrentView('world-map')}
+                  realmColor={selectedRealm.color}
+                  realmName={selectedRealm.name}
+                  role={currentRole}
+                  onCreateQuest={() => setIsCreatingQuest(true)}
+                />
+              </Suspense>
             </motion.div>
           )}
 
@@ -566,7 +575,9 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
               <p className="text-muted-foreground">{selectedRealm.name}</p>
             </div>
             <div className="flex-1">
-              <ConstellationView quests={realmQuests} />
+              <Suspense fallback={<LoadingFallback />}>
+                <ConstellationView quests={realmQuests} />
+              </Suspense>
             </div>
             </motion.div>
           )}
@@ -621,11 +632,13 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <ArchivesView
-                crystals={crystals || []}
-                theme={currentTheme}
-                onAttune={handleAttuneCrystal}
-              />
+              <Suspense fallback={<LoadingFallback />}>
+                <ArchivesView
+                  crystals={crystals || []}
+                  theme={currentTheme}
+                  onAttune={handleAttuneCrystal}
+                />
+              </Suspense>
             </motion.div>
           )}
 
@@ -637,11 +650,13 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <CharacterSheet
-                profile={currentProfile}
-                theme={currentTheme}
-                onUpdateAvatar={handleUpdateAvatar}
-              />
+              <Suspense fallback={<LoadingFallback />}>
+                <CharacterSheet
+                  profile={currentProfile}
+                  theme={currentTheme}
+                  onUpdateAvatar={handleUpdateAvatar}
+                />
+              </Suspense>
             </motion.div>
           )}
 
@@ -653,11 +668,13 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <Leaderboard
-                profiles={allProfiles || []}
-                theme={currentTheme}
-                currentUserId={currentProfile.id}
-              />
+              <Suspense fallback={<LoadingFallback />}>
+                <Leaderboard
+                  profiles={allProfiles || []}
+                  theme={currentTheme}
+                  currentUserId={currentProfile.id}
+                />
+              </Suspense>
             </motion.div>
           )}
 
@@ -669,21 +686,23 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <TeacherDashboard
-                quests={quests || []}
-                submissions={submissions || []}
-                realms={realms || []}
-                theme={currentTheme}
-                onDeleteQuest={handleDeleteQuest}
-                onDeleteRealm={handleDeleteRealm}
-                onUpdateSubmission={handleUpdateSubmission}
-                onImportRealms={(newRealms) => {
-                  setRealms((current) => [...(current || []), ...newRealms])
-                }}
-                onImportQuests={(newQuests) => {
-                  setQuests((current) => [...(current || []), ...newQuests])
-                }}
-              />
+              <Suspense fallback={<LoadingFallback />}>
+                <TeacherDashboard
+                  quests={quests || []}
+                  submissions={submissions || []}
+                  realms={realms || []}
+                  theme={currentTheme}
+                  onDeleteQuest={handleDeleteQuest}
+                  onDeleteRealm={handleDeleteRealm}
+                  onUpdateSubmission={handleUpdateSubmission}
+                  onImportRealms={(newRealms) => {
+                    setRealms((current) => [...(current || []), ...newRealms])
+                  }}
+                  onImportQuests={(newQuests) => {
+                    setQuests((current) => [...(current || []), ...newQuests])
+                  }}
+                />
+              </Suspense>
             </motion.div>
           )}
 
@@ -695,12 +714,14 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <AnalyticsDashboard
-                quests={quests || []}
-                submissions={submissions || []}
-                profiles={allProfiles || []}
-                theme={currentTheme}
-              />
+              <Suspense fallback={<LoadingFallback />}>
+                <AnalyticsDashboard
+                  quests={quests || []}
+                  submissions={submissions || []}
+                  profiles={allProfiles || []}
+                  theme={currentTheme}
+                />
+              </Suspense>
             </motion.div>
           )}
         </AnimatePresence>
@@ -715,29 +736,35 @@ Just provide the quest name and description as JSON: {"name": "string", "descrip
       />
 
       {isEditingRealms && (
-        <RealmEditor
-          realms={realms || []}
-          theme={currentTheme}
-          onUpdateRealms={handleUpdateRealms}
-          onClose={() => setIsEditingRealms(false)}
-        />
+        <Suspense fallback={<LoadingFallback />}>
+          <RealmEditor
+            realms={realms || []}
+            theme={currentTheme}
+            onUpdateRealms={handleUpdateRealms}
+            onClose={() => setIsEditingRealms(false)}
+          />
+        </Suspense>
       )}
 
-      <RealmCreator
-        open={isCreatingRealm}
-        theme={currentTheme}
-        onClose={() => setIsCreatingRealm(false)}
-        onCreate={handleCreateRealm}
-      />
+      <Suspense fallback={null}>
+        <RealmCreator
+          open={isCreatingRealm}
+          theme={currentTheme}
+          onClose={() => setIsCreatingRealm(false)}
+          onCreate={handleCreateRealm}
+        />
+      </Suspense>
 
-      <QuestCreator
-        open={isCreatingQuest}
-        theme={currentTheme}
-        realmId={selectedRealmId || ''}
-        realm={selectedRealm}
-        onClose={() => setIsCreatingQuest(false)}
-        onCreate={handleCreateQuest}
-      />
+      <Suspense fallback={null}>
+        <QuestCreator
+          open={isCreatingQuest}
+          theme={currentTheme}
+          realmId={selectedRealmId || ''}
+          realm={selectedRealm}
+          onClose={() => setIsCreatingQuest(false)}
+          onCreate={handleCreateQuest}
+        />
+      </Suspense>
 
       <Toaster position="top-right" />
       
