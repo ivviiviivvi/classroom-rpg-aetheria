@@ -3,6 +3,7 @@ import { SpeakerHigh, SpeakerSlash } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Slider } from '@/components/ui/slider'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { soundEffects } from '@/lib/sound-effects'
 import { useKV } from '@github/spark/hooks'
 
@@ -28,34 +29,46 @@ export function SoundSettings() {
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon"
-          className="glass-button"
-        >
-          {isMuted || (volume ?? 0.3) === 0 ? (
-            <SpeakerSlash size={20} weight="fill" />
-          ) : (
-            <SpeakerHigh size={20} weight="fill" />
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="glass-panel w-64" align="end">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Sound Effects</span>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <PopoverTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              onClick={handleToggleMute}
+              className="glass-button"
+              aria-label="Sound settings"
             >
-              {isMuted ? (
+              {isMuted || (volume ?? 0.3) === 0 ? (
                 <SpeakerSlash size={20} weight="fill" />
               ) : (
                 <SpeakerHigh size={20} weight="fill" />
               )}
             </Button>
+          </PopoverTrigger>
+        </TooltipTrigger>
+        <TooltipContent>Sound Settings</TooltipContent>
+      </Tooltip>
+      <PopoverContent className="glass-panel w-64" align="end">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Sound Effects</span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleToggleMute}
+                  aria-label={isMuted ? "Unmute sound" : "Mute sound"}
+                >
+                  {isMuted ? (
+                    <SpeakerSlash size={20} weight="fill" />
+                  ) : (
+                    <SpeakerHigh size={20} weight="fill" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{isMuted ? "Unmute" : "Mute"}</TooltipContent>
+            </Tooltip>
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -69,6 +82,7 @@ export function SoundSettings() {
               step={0.01}
               disabled={isMuted ?? false}
               className="w-full"
+              aria-label="Volume"
             />
           </div>
         </div>
@@ -76,4 +90,3 @@ export function SoundSettings() {
     </Popover>
   )
 }
-
