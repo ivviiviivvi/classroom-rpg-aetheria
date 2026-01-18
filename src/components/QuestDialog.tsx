@@ -84,9 +84,10 @@ export function QuestDialog({ quest, theme, open, onClose, onSubmit }: QuestDial
               placeholder="Enter your submission here..."
               className="min-h-[150px] md:min-h-[200px] resize-none glass-panel text-sm md:text-base"
               disabled={isSubmitting}
+              maxLength={2000}
             />
             <p className="text-xs text-muted-foreground">
-              {content.length} characters
+              {content.length}/2000 characters
             </p>
           </div>
 
